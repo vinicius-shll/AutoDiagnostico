@@ -1,7 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using AutoDiagnostico.Data;
+
+
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<AutoDiagnosticoContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AutoDiagnosticoContext")));
 
 var app = builder.Build();
 
