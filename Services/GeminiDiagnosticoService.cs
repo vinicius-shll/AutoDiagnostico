@@ -1,23 +1,16 @@
+using System.Net.Http.Json;
+using System.Text.Json;
 using AutoDiagnostico.Models;
 
 namespace AutoDiagnostico.Services;
 
-/// <summary>
-/// Service REAL do diagnóstico, usando a API do Gemini.
-/// DONA: Milena. Os passos estão nos cards do Trello:
-///   - "GeminiDiagnosticoService (parte 1): fazer a chamada básica ao Gemini"
-///   - "GeminiDiagnosticoService (parte 2): pedir resposta em JSON..."
-///
-/// Para usar este service na SUA máquina (sem mexer em arquivo):
-///   dotnet user-secrets set "Gemini:ApiKey" "SUA_CHAVE"
-///   dotnet user-secrets set "ServicosFalsos:Diagnostico" "false"
-/// </summary>
+// Service REAL do diagnóstico, usando a IA do Google (Gemini). Dona: Milena.
 public class GeminiDiagnosticoService : IDiagnosticoService
 {
-    private readonly HttpClient _http;           // o "navegador" do C#, já com timeout de 30 s (Program.cs)
+    private readonly HttpClient _http;
     private readonly ILogger<GeminiDiagnosticoService> _logger;
-    private readonly string _apiKey;             // vem do user-secrets ("Gemini:ApiKey")
-    private readonly string _modelo;             // vem do appsettings ("Gemini:Modelo")
+    private readonly string _apiKey;
+    private readonly string _modelo;
 
     public GeminiDiagnosticoService(
         HttpClient http,
@@ -27,36 +20,58 @@ public class GeminiDiagnosticoService : IDiagnosticoService
         _http = http;
         _logger = logger;
         _apiKey = config["Gemini:ApiKey"] ?? string.Empty;
-        _modelo = config["Gemini:Modelo"] ?? "gemini-flash-latest";
+        _modelo = config["Gemini:Modelo"] ?? "gemini-3.7-flash";
     }
 
-    public Task<DiagnosticoResultado> DiagnosticarAsync(string sintoma)
+    public async Task<DiagnosticoResultado> DiagnosticarAsync(string sintoma)
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
         {
-            _logger.LogError("Gemini:ApiKey não configurada. Rode: dotnet user-secrets set \"Gemini:ApiKey\" \"SUA_CHAVE\"");
             throw new ServicoExternoException("O serviço de diagnóstico não está configurado.");
         }
 
-        // TODO (Milena, parte 1):
-        //   1. Trocar a assinatura para "public async Task<DiagnosticoResultado> DiagnosticarAsync(...)".
-        //   2. URL: $"https://generativelanguage.googleapis.com/v1beta/models/{_modelo}:generateContent"
-        //   3. Corpo: new { contents = new[] { new { parts = new[] { new { text = prompt } } } } }
-        //   4. HttpRequestMessage(HttpMethod.Post, url) + header "x-goog-api-key" = _apiKey
-        //      + Content = JsonContent.Create(corpo)   (using System.Net.Http.Json;)
-        //   5. var resposta = await _http.SendAsync(requisicao);
-        //   6. Texto em: candidates[0].content.parts[0].text   (using System.Text.Json;)
-        //
-        // TODO (Milena, parte 2):
-        //   - Prompt pedindo JSON com resumo, possiveisCausas, gravidade e especialidade
-        //     (especialidade só pode ser um valor de Especialidades.Todas).
-        //   - generationConfig = new { responseMimeType = "application/json" }
-        //   - JsonSerializer.Deserialize<DiagnosticoResultado>(texto,
-        //         new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-        _logger.LogWarning("GeminiDiagnosticoService ainda não implementado (modelo configurado: {Modelo}).", _modelo);
-        _ = _http; // remover esta linha quando o _http for usado de verdade
-        throw new NotImplementedException(
-            "GeminiDiagnosticoService ainda não foi implementado (card da Milena). " +
-            "Para continuar usando o dublê: ServicosFalsos:Diagnostico = true.");
+        // 1. Endereço da API do Gemini, com o modelo escolhido no appsettings.json
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_modelo}:generateContent";
+
+        // 2. A pergunta que vamos fazer para a IA
+        var prompt = "Você é um mecânico experiente. Um motorista descreveu este problema no carro: \""
+                      + sintoma + "\". Explique em poucas frases o que pode ser.";
+
+        // 3. O "pacote" que o Gemini espera receber
+        var corpo = new
+        {
+            contents = new[]
+            {
+                new { parts = new[] { new { text = prompt } } }
+            }
+        };
+
+        // 4. Monta o pedido, coloca a chave no cabeçalho e envia
+        using var requisicao = new HttpRequestMessage(HttpMethod.Post, url);
+        requisicao.Headers.Add("x-goog-api-key", _apiKey);
+        requisicao.Content = JsonContent.Create(corpo);
+
+        using var resposta = await _http.SendAsync(requisicao);
+        var json = await resposta.Content.ReadAsStringAsync();
+
+        if (!resposta.IsSuccessStatusCode)
+        {
+            _logger.LogError("O Gemini respondeu com erro {Status}: {Corpo}", (int)resposta.StatusCode, json);
+            throw new ServicoExternoException("Não conseguimos gerar o diagnóstico agora. Tente novamente.");
+        }
+
+        // 5. Tira o texto de dentro da resposta: candidates[0].content.parts[0].text
+        using var documento = JsonDocument.Parse(json);
+        var texto = documento.RootElement
+            .GetProperty("candidates")[0]
+            .GetProperty("content")
+            .GetProperty("parts")[0]
+            .GetProperty("text")
+            .GetString() ?? string.Empty;
+
+        _logger.LogInformation("Resposta do Gemini: {Texto}", texto);
+
+        // 6. Por enquanto, o texto inteiro vai no Resumo (a parte 2 separa os campos)
+        return new DiagnosticoResultado { Resumo = texto };
     }
 }
