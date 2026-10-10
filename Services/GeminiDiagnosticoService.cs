@@ -4,7 +4,6 @@ using AutoDiagnostico.Models;
 
 namespace AutoDiagnostico.Services;
 
-// Service REAL do diagnóstico, usando a IA do Google (Gemini). Dona: Milena.
 public class GeminiDiagnosticoService : IDiagnosticoService
 {
     private readonly HttpClient _http;
@@ -20,58 +19,109 @@ public class GeminiDiagnosticoService : IDiagnosticoService
         _http = http;
         _logger = logger;
         _apiKey = config["Gemini:ApiKey"] ?? string.Empty;
-        _modelo = config["Gemini:Modelo"] ?? "gemini-3.7-flash";
+
+        var modeloConfig = config["Gemini:Modelo"];
+        _modelo = string.IsNullOrWhiteSpace(modeloConfig) ? "gemini-2.5-flash" : modeloConfig.Trim();
     }
 
     public async Task<DiagnosticoResultado> DiagnosticarAsync(string sintoma)
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
         {
-            throw new ServicoExternoException("O serviço de diagnóstico não está configurado.");
+            return CriarResultadoFallback("O serviço de diagnóstico não está configurado corretamente.");
         }
 
-        // 1. Endereço da API do Gemini, com o modelo escolhido no appsettings.json
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_modelo}:generateContent";
+        var modelosParaTentar = new List<string>
+{
+    _modelo,                // Modelo vindo do appsettings/user-secrets
+    "gemini-3.8-flash",     // Modelo atual recomendado pela Google
+    "gemini-3.7-flash",     // Fallback rápido
+    "gemini-3.5-flash-lite" // Fallback leve
+}.Distinct().ToList();
 
-        // 2. A pergunta que vamos fazer para a IA
-        var prompt = "Você é um mecânico experiente. Um motorista descreveu este problema no carro: \""
-                      + sintoma + "\". Explique em poucas frases o que pode ser.";
+        var prompt = string.Join("\n",
+            "Você é um assistente de pré-diagnóstico automotivo. Você NÃO substitui um mecânico.",
+            "Um motorista descreveu este problema no carro: \"" + sintoma + "\"",
+            "Responda somente com um JSON com estes 4 campos:",
+            "- resumo: 2 ou 3 frases simples explicando o que pode ser;",
+            "- possiveisCausas: uma lista com 2 a 4 causas prováveis, em textos curtos;",
+            "- gravidade: exatamente Baixa, Média ou Alta;",
+            "- especialidade: exatamente um destes valores: " + string.Join(", ", Especialidades.Todas) + ".",
+            "Se o texto não for sobre um problema de carro, use gravidade Baixa, especialidade Outros e peça mais detalhes no resumo.");
 
-        // 3. O "pacote" que o Gemini espera receber
         var corpo = new
         {
             contents = new[]
             {
                 new { parts = new[] { new { text = prompt } } }
-            }
+            },
+            generationConfig = new { responseMimeType = "application/json" }
         };
 
-        // 4. Monta o pedido, coloca a chave no cabeçalho e envia
-        using var requisicao = new HttpRequestMessage(HttpMethod.Post, url);
-        requisicao.Headers.Add("x-goog-api-key", _apiKey);
-        requisicao.Content = JsonContent.Create(corpo);
-
-        using var resposta = await _http.SendAsync(requisicao);
-        var json = await resposta.Content.ReadAsStringAsync();
-
-        if (!resposta.IsSuccessStatusCode)
+        foreach (var modeloAtual in modelosParaTentar)
         {
-            _logger.LogError("O Gemini respondeu com erro {Status}: {Corpo}", (int)resposta.StatusCode, json);
-            throw new ServicoExternoException("Não conseguimos gerar o diagnóstico agora. Tente novamente.");
+            try
+            {
+                var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modeloAtual}:generateContent";
+
+                using var requisicao = new HttpRequestMessage(HttpMethod.Post, url);
+                requisicao.Headers.Add("x-goog-api-key", _apiKey);
+                requisicao.Content = JsonContent.Create(corpo);
+
+                using var resposta = await _http.SendAsync(requisicao);
+                var json = await resposta.Content.ReadAsStringAsync();
+
+                if ((int)resposta.StatusCode == 503 || resposta.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    _logger.LogWarning("Modelo {Modelo} indisponível (Erro {Status}). Tentando o próximo modelo...", modeloAtual, (int)resposta.StatusCode);
+                    continue;
+                }
+
+                if (!resposta.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Erro no modelo {Modelo} ({Status}): {Corpo}", modeloAtual, (int)resposta.StatusCode, json);
+                    continue;
+                }
+
+                using var documento = JsonDocument.Parse(json);
+                var texto = documento.RootElement
+                    .GetProperty("candidates")[0]
+                    .GetProperty("content")
+                    .GetProperty("parts")[0]
+                    .GetProperty("text")
+                    .GetString() ?? string.Empty;
+
+                var opcoes = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var resultado = JsonSerializer.Deserialize<DiagnosticoResultado>(texto, opcoes);
+
+                if (resultado != null && !string.IsNullOrWhiteSpace(resultado.Resumo))
+                {
+                    if (!Especialidades.Todas.Contains(resultado.Especialidade))
+                    {
+                        resultado.Especialidade = Especialidades.Outros;
+                    }
+
+                    _logger.LogInformation("Diagnóstico gerado com sucesso usando o modelo: {Modelo}", modeloAtual);
+                    return resultado;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falha ao processar a requisição com o modelo {Modelo}.", modeloAtual);
+            }
         }
 
-        // 5. Tira o texto de dentro da resposta: candidates[0].content.parts[0].text
-        using var documento = JsonDocument.Parse(json);
-        var texto = documento.RootElement
-            .GetProperty("candidates")[0]
-            .GetProperty("content")
-            .GetProperty("parts")[0]
-            .GetProperty("text")
-            .GetString() ?? string.Empty;
+        return CriarResultadoFallback("Todos os servidores da IA estão temporariamente sobrecarregados. Por favor, tente novamente em alguns instantes.");
+    }
 
-        _logger.LogInformation("Resposta do Gemini: {Texto}", texto);
-
-        // 6. Por enquanto, o texto inteiro vai no Resumo (a parte 2 separa os campos)
-        return new DiagnosticoResultado { Resumo = texto };
+    private static DiagnosticoResultado CriarResultadoFallback(string mensagemErro)
+    {
+        return new DiagnosticoResultado
+        {
+            Resumo = mensagemErro,
+            PossiveisCausas = new List<string> { "Serviço indisponível temporariamente" },
+            Gravidade = "Baixa",
+            Especialidade = Especialidades.Outros
+        };
     }
 }
