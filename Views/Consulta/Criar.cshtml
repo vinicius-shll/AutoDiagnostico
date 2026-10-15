@@ -1,0 +1,84 @@
+@model AutoDiagnostico.Models.ConsultaFormViewModel
+
+@{
+    ViewData["Title"] = "Fazer diagnóstico";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <h1 class="mb-2">Fazer diagnóstico</h1>
+
+        <p class="text-muted mb-4">
+            Quanto mais detalhes, melhor: quando acontece,
+            que barulho é, se acende alguma luz no painel.
+        </p>
+
+        <div class="card">
+            <div class="card-body">
+
+                <form asp-action="Criar"
+                      method="post"
+                      id="formDiagnostico">
+
+                    <div class="mb-3">
+                        <label asp-for="Sintoma"
+                               class="form-label fw-semibold">
+                            O que o carro está fazendo?
+                        </label>
+
+                        <textarea asp-for="Sintoma"
+                                  class="form-control"
+                                  rows="5"
+                                  placeholder="Ex.: quando eu freio, aparece um barulho metálico e o volante treme."></textarea>
+
+                        <span asp-validation-for="Sintoma"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Endereco"
+                               class="form-label fw-semibold">
+                            Onde você está? (endereço ou CEP)
+                        </label>
+
+                        <input asp-for="Endereco"
+                               class="form-control"
+                               placeholder="Ex.: Rua XV de Novembro, 100, Curitiba ou 80020-310" />
+
+                        <span asp-validation-for="Endereco"
+                              class="text-danger"></span>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary btn-lg w-100"
+                            id="botaoDiagnosticar">
+                        Diagnosticar
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById("formDiagnostico")
+            .addEventListener("submit", function () {
+
+                if (window.jQuery && !$(this).valid()) {
+                    return;
+                }
+
+                var botao = document.getElementById("botaoDiagnosticar");
+
+                botao.disabled = true;
+                botao.textContent = "Analisando... aguarde alguns segundos";
+            });
+    </script>
+}
