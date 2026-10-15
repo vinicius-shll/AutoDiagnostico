@@ -1,8 +1,72 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Início";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="p-5 mb-4 bg-light rounded-3 text-center">
+    <h1 class="display-5 fw-bold">
+        O seu carro está estranho?
+    </h1>
+
+    <p class="fs-5 mb-4">
+        Descreva o problema com as suas palavras.
+        A inteligência artificial sugere o que pode ser
+        e mostra oficinas mecânicas perto de você.
+    </p>
+
+    <a class="btn btn-primary btn-lg"
+       asp-controller="Consulta"
+       asp-action="Criar">
+        Fazer diagnóstico
+    </a>
 </div>
+
+<div class="row text-center g-4">
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">1. Descreva</h2>
+
+                <p class="mb-0">
+                    Conte o que o carro está fazendo:
+                    um barulho, um cheiro,
+                    uma luz no painel.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">2. Receba o diagnóstico</h2>
+
+                <p class="mb-0">
+                    A IA explica as causas mais prováveis
+                    e o quanto o problema é grave.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">3. Encontre uma oficina</h2>
+
+                <p class="mb-0">
+                    Veja as oficinas mais próximas,
+                    com destaque para as especialistas
+                    no seu problema.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<p class="text-muted small text-center mt-4">
+    O diagnóstico é uma orientação gerada por
+    inteligência artificial e não substitui
+    a avaliação de um mecânico.
+</p>
