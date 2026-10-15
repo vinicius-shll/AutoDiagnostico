@@ -1,0 +1,118 @@
+@model AutoDiagnostico.Models.ResultadoViewModel
+@{
+    ViewData["Title"] = "Resultado do diagnóstico";
+
+    // Classes Bootstrap para indicar visualmente a gravidade do problema.
+    var cor = Model.Diagnostico?.Gravidade switch
+    {
+        "Alta" => "danger",
+        "Média" => "warning",
+        "Baixa" => "success",
+        _ => "secondary"
+    };
+}
+
+<h1 class="mb-1">Resultado do diagnóstico</h1>
+<p class="text-muted mb-4">Você descreveu: "@(Model.Sintoma)"</p>
+
+@* BLOCO 1: DIAGNÓSTICO *@
+<h2 class="h4">O que pode ser</h2>
+
+@if (!string.IsNullOrEmpty(Model.AvisoDiagnostico))
+{
+    <div class="alert alert-warning" role="alert">@(Model.AvisoDiagnostico)</div>
+}
+else if (Model.Diagnostico != null)
+{
+    <div class="card border-@cor mb-4">
+        <div class="card-header d-flex flex-wrap justify-content-between gap-2">
+            <span>
+                Gravidade:
+                <span class="badge bg-@cor">@(Model.Diagnostico.Gravidade)</span>
+            </span>
+            <span>Procure: <strong>@(Model.Diagnostico.Especialidade)</strong></span>
+        </div>
+        <div class="card-body">
+            <p class="card-text">@(Model.Diagnostico.Resumo)</p>
+
+            @if (Model.Diagnostico.PossiveisCausas.Count > 0)
+            {
+                <h3 class="h6">Possíveis causas</h3>
+                <ul class="mb-0">
+                    @foreach (var causa in Model.Diagnostico.PossiveisCausas)
+                    {
+                        <li>@causa</li>
+                    }
+                </ul>
+            }
+        </div>
+        <div class="card-footer small text-muted">
+            Orientação gerada por inteligência artificial. Confirme sempre com um mecânico.
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        O diagnóstico não está disponível no momento. Tente uma nova consulta.
+    </div>
+}
+
+@* BLOCO 2: OFICINAS PRÓXIMAS *@
+<h2 class="h4 mt-4">Oficinas perto de: @(Model.Endereco)</h2>
+
+@if (!string.IsNullOrEmpty(Model.AvisoOficinas))
+{
+    <div class="alert alert-warning" role="alert">@(Model.AvisoOficinas)</div>
+}
+else if (Model.Oficinas.Count == 0)
+{
+    <div class="alert alert-info" role="status">
+        Não encontramos oficinas mecânicas perto desse endereço.
+        Tente um endereço mais completo ou um CEP.
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+        @foreach (var oficina in Model.Oficinas)
+        {
+            var distancia = "";
+            if (oficina.DistanciaMetros != null)
+            {
+                distancia = oficina.DistanciaMetros < 1000
+                    ? $"{oficina.DistanciaMetros:0} m"
+                    : $"{oficina.DistanciaMetros / 1000:0.0} km";
+            }
+
+            <div class="col">
+                <div class="card h-100 @(oficina.Destaque ? "border-success" : "")">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">@oficina.Nome</h3>
+
+                        @if (oficina.Destaque)
+                        {
+                            <span class="badge bg-success mb-2">
+                                Especialista em @(Model.Diagnostico?.Especialidade ?? "serviços automotivos")
+                            </span>
+                        }
+
+                        <p class="card-text mb-1">@oficina.Endereco</p>
+                        @if (!string.IsNullOrEmpty(distancia))
+                        {
+                            <p class="card-text text-muted small mb-0">@distancia</p>
+                        }
+
+                        @* MAPA: o Kauan coloca aqui o botão "Ver no mapa" (card Kauan 4/4). *@
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="mt-4">
+    <a class="btn btn-primary" asp-controller="Consulta" asp-action="Criar">
+        Fazer nova consulta
+    </a>
+</div>
