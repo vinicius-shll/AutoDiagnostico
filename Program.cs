@@ -27,7 +27,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // DUBLÊ ou SERVICE REAL — escolhido pela seção "ServicosFalsos" do appsettings.json.
 // Para mudar só na sua máquina: dotnet user-secrets set "ServicosFalsos:Diagnostico" "false"
-var tempoMaximoChamada = TimeSpan.FromSeconds(30);
+var tempoMaximoChamada = TimeSpan.FromSeconds(90);
 
 if (builder.Configuration.GetValue("ServicosFalsos:Diagnostico", true))
 {
