@@ -1,6 +1,7 @@
 using AutoDiagnostico.Data;
 using AutoDiagnostico.Models;
 using AutoDiagnostico.Services;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoDiagnostico.Controllers;
@@ -61,7 +62,7 @@ public class ConsultaController : Controller
         // 3. Pede as oficinas. Se a busca falhar, guarda a mensagem e continua
         try
         {
-            resultado.Oficinas = await _oficinas.BuscarProximasAsync(form.Endereco);
+            resultado.Oficinas = await _oficinas.BuscarProximasAsync(PrepararEndereco(form.Endereco));
         }
         catch (ServicoExternoException ex)
         {
@@ -85,5 +86,12 @@ public class ConsultaController : Controller
 
         // 5. Mostra a tela de resultado (do Gabriel)
         return View("Resultado", resultado);
+    }
+
+    // Se a pessoa digitou só um CEP (ex.: 80020-310), acrescenta ", Brasil" para a Geoapify entender melhor
+    private static string PrepararEndereco(string endereco)
+    {
+        var texto = endereco.Trim();
+        return Regex.IsMatch(texto, @"^\d{5}-?\d{3}$") ? texto + ", Brasil" : texto;
     }
 }
