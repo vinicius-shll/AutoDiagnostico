@@ -1,0 +1,50 @@
+@model List<AutoDiagnostico.Models.Consulta>
+@{
+    ViewData["Title"] = "Meu histórico";
+}
+
+<h1 class="mb-4">Meu histórico</h1>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">
+        Você ainda não fez nenhuma consulta.
+        <a asp-controller="Consulta" asp-action="Criar" class="alert-link">Fazer um diagnóstico agora</a>
+    </div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>O que o carro estava fazendo</th>
+                <th>Especialidade</th>
+                <th>Gravidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var consulta in Model)
+            {
+                var corGravidade = consulta.Gravidade switch
+                {
+                    "Alta" => "bg-danger",
+                    "Média" => "bg-warning text-dark",
+                    "Baixa" => "bg-success",
+                    _ => "bg-secondary"
+                };
+
+                var sintomaCurto = consulta.Sintoma.Length > 80
+                    ? consulta.Sintoma.Substring(0, 80) + "..."
+                    : consulta.Sintoma;
+
+                <tr>
+                    <td>@consulta.DataHora.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@sintomaCurto</td>
+                    <td>@consulta.Especialidade</td>
+                    <td><span class="badge @corGravidade">@consulta.Gravidade</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
