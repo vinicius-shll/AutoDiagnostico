@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using AutoDiagnostico.Models;
 
 namespace AutoDiagnostico.Services;
@@ -99,9 +100,39 @@ public class GeoapifyOficinaService : IOficinaService
     // Transforma um endereço (ou CEP) em latitude e longitude
     private async Task<(double Lat, double Lon)> ObterCoordenadasAsync(string endereco)
     {
+        // 1. Tenta direto na Geoapify
+        var coordenadas = await GeocodificarAsync(endereco);
+
+        // 2. A Geoapify não conhece muitos CEPs do Brasil. Se for um CEP, o ViaCEP (Correios)
+        //    diz a rua e a cidade, e tentamos de novo com esse endereço
+        if (coordenadas == null)
+        {
+            var cep = Regex.Match(endereco, @"\b(\d{5})-?(\d{3})\b");
+            if (cep.Success)
+            {
+                var enderecoDoCep = await BuscarEnderecoDoCepAsync(cep.Groups[1].Value + cep.Groups[2].Value);
+                if (enderecoDoCep != null)
+                {
+                    _logger.LogInformation("CEP {Cep} não achado na Geoapify; tentando '{Endereco}' (ViaCEP)", cep.Value, enderecoDoCep);
+                    coordenadas = await GeocodificarAsync(enderecoDoCep);
+                }
+            }
+        }
+
+        if (coordenadas == null)
+        {
+            throw new ServicoExternoException("Não encontramos esse endereço. Confira e tente de novo.");
+        }
+
+        return coordenadas.Value;
+    }
+
+    // Pergunta à Geoapify onde fica o texto; devolve null se ela não achar nada
+    private async Task<(double Lat, double Lon)?> GeocodificarAsync(string texto)
+    {
         // 1. Monta o endereço da API de Geocoding, só com resultados do Brasil
         var url = "https://api.geoapify.com/v1/geocode/search"
-                + "?text=" + Uri.EscapeDataString(endereco)
+                + "?text=" + Uri.EscapeDataString(texto)
                 + "&filter=countrycode:br&lang=pt&format=json&limit=1"
                 + "&apiKey=" + _apiKey;
 
@@ -114,11 +145,44 @@ public class GeoapifyOficinaService : IOficinaService
 
         if (resultados.GetArrayLength() == 0)
         {
-            throw new ServicoExternoException("Não encontramos esse endereço. Confira e tente de novo.");
+            return null;
         }
 
         var primeiro = resultados[0];
         return (primeiro.GetProperty("lat").GetDouble(), primeiro.GetProperty("lon").GetDouble());
+    }
+
+    // Consulta o ViaCEP e monta "Rua, Bairro, Cidade - UF, Brasil". Devolve null se não achar.
+    // Se o ViaCEP falhar, também devolve null: aí o usuário vê "Não encontramos esse endereço".
+    private async Task<string?> BuscarEnderecoDoCepAsync(string cep)
+    {
+        try
+        {
+            var json = await _http.GetStringAsync("https://viacep.com.br/ws/" + cep + "/json/");
+            using var documento = JsonDocument.Parse(json);
+            var raiz = documento.RootElement;
+
+            // CEP inexistente: o ViaCEP responde { "erro": "true" }
+            if (raiz.TryGetProperty("erro", out _))
+            {
+                return null;
+            }
+
+            var cidade = LerTexto(raiz, "localidade");
+            var uf = LerTexto(raiz, "uf");
+            if (string.IsNullOrWhiteSpace(cidade))
+            {
+                return null;
+            }
+
+            var partes = new[] { LerTexto(raiz, "logradouro"), LerTexto(raiz, "bairro"), cidade + " - " + uf, "Brasil" };
+            return string.Join(", ", partes.Where(p => !string.IsNullOrWhiteSpace(p)));
+        }
+        catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException || ex is JsonException)
+        {
+            _logger.LogWarning(ex, "Falha ao consultar o ViaCEP para o CEP {Cep}.", cep);
+            return null;
+        }
     }
 
     // Lê um campo de texto do JSON; se ele não existir, devolve null
