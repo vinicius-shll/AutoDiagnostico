@@ -2,7 +2,7 @@ namespace AutoDiagnostico.Models;
 
 /// <summary>
 /// Uma oficina encontrada perto do motorista.
-/// Quem preenche: GeoapifyOficinaService (Kauan) ou o dublê OficinaFakeService.
+/// Quem preenche: GeoapifyOficinaService (Kauan).
 /// Quem usa: a tela de resultado (Gabriel).
 /// Não mude os nomes destes campos sem avisar o Gabriel e o Vinicius.
 /// </summary>

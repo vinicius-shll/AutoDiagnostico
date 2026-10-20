@@ -2,7 +2,7 @@ namespace AutoDiagnostico.Models;
 
 /// <summary>
 /// O diagnóstico devolvido pela IA, já organizado em campos.
-/// Quem preenche: GeminiDiagnosticoService (Milena) ou o dublê DiagnosticoFakeService.
+/// Quem preenche: GeminiDiagnosticoService (Milena).
 /// Quem usa: ConsultaController (Vinicius) e a tela de resultado (Gabriel).
 /// </summary>
 public class DiagnosticoResultado
