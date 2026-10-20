@@ -93,7 +93,9 @@ public class ContaController: Controller
         };
         var identidade = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identidade));
+        // IsPersistent: o login continua mesmo se o navegador for fechado (até o ExpireTimeSpan do Program.cs)
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identidade),
+            new AuthenticationProperties { IsPersistent = true });
 
         if(!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
