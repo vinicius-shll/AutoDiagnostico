@@ -87,5 +87,5 @@ No GitHub:
 
 > O esqueleto está na main. Antes de começar, todo mundo faz a Rotina de início do Trello: git checkout main, git pull, git checkout sua-branch, git merge main, dotnet ef database update, dotnet run.
 > Não é mais preciso rodar "dotnet user-secrets init": o projeto já tem o ID dos segredos. Milena e Kauan: rodem de novo o "dotnet user-secrets set" da chave de vocês. Se tinham feito init antes, a chave ficou guardada com outro ID.
-> Por padrão o site usa os DUBLÊS (dados falsos), então ninguém precisa de chave para trabalhar.
+> O site usa os services reais: para o diagnóstico e a busca de oficinas funcionarem, configure Gemini:ApiKey e Geoapify:ApiKey nos user-secrets.
 > Cada um mexe só nos arquivos do seu card. Program.cs, appsettings.json e Migrations são só meus.

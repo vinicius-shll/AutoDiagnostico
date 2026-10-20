@@ -29,29 +29,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
-// DUBLÊ ou SERVICE REAL — escolhido pela seção "ServicosFalsos" do appsettings.json.
-// Para mudar só na sua máquina: dotnet user-secrets set "ServicosFalsos:Diagnostico" "false"
+// Services reais. As chaves ficam nos user-secrets de cada máquina:
+// dotnet user-secrets set "Gemini:ApiKey" "SUA_CHAVE"
+// dotnet user-secrets set "Geoapify:ApiKey" "SUA_CHAVE"
 var tempoMaximoChamada = TimeSpan.FromSeconds(30);
 
-if (builder.Configuration.GetValue("ServicosFalsos:Diagnostico", true))
-{
-    builder.Services.AddScoped<IDiagnosticoService, DiagnosticoFakeService>();
-}
-else
-{
-    builder.Services.AddHttpClient<IDiagnosticoService, GeminiDiagnosticoService>(
-        client => client.Timeout = tempoMaximoChamada);
-}
+builder.Services.AddHttpClient<IDiagnosticoService, GeminiDiagnosticoService>(
+    client => client.Timeout = tempoMaximoChamada);
 
-if (builder.Configuration.GetValue("ServicosFalsos:Oficinas", true))
-{
-    builder.Services.AddScoped<IOficinaService, OficinaFakeService>();
-}
-else
-{
-    builder.Services.AddHttpClient<IOficinaService, GeoapifyOficinaService>(
-        client => client.Timeout = tempoMaximoChamada);
-}
+builder.Services.AddHttpClient<IOficinaService, GeoapifyOficinaService>(
+    client => client.Timeout = tempoMaximoChamada);
 
 var app = builder.Build();
 
