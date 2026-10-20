@@ -1,0 +1,25 @@
+@* Pedaço do menu com "Entrar / Criar conta" ou "Olá, Fulano / Sair". Dono: Luan. *@
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <span class="nav-link">Olá, @(User.Identity.Name)</span>
+        </li>
+        <li class="nav-item">
+            <form asp-controller="Conta" asp-action="Sair" method="post">
+                <button type="submit" class="nav-link btn btn-link">Sair</button>
+            </form>
+        </li>
+    </ul>
+}
+else
+{
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Conta" asp-action="Login">Entrar</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Conta" asp-action="Cadastrar">Criar conta</a>
+        </li>
+    </ul>
+}

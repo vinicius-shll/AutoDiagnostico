@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using AutoDiagnostico.Data;
 using AutoDiagnostico.Models;
 using Microsoft.AspNetCore.Identity;
@@ -47,7 +50,63 @@ public class ContaController: Controller
         _context.Usuarios.Add(usuario);
         await _context.SaveChangesAsync();
 
-        TempData["Mensagem"] = "Conta criada com sucesso!";
+        TempData["Mensagem"] = "Conta criada com sucesso! Agora é só entrar.";
+        return RedirectToAction(nameof(Login));
+    }
+
+    [HttpGet]
+    public IActionResult Login(string? returnUrl = null)
+    {
+        ViewData["ReturnUrl"] = returnUrl;
+        return View(new LoginViewModel());
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginViewModel vm, string? returnUrl = null)
+    {
+        ViewData["ReturnUrl"] = returnUrl;
+
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+
+        var email = vm.Email.Trim().ToLower();
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+
+        var senhaConfere = usuario != null && !string.IsNullOrEmpty(usuario.SenhaHash) && _hasher.VerifyHashedPassword(usuario, usuario.SenhaHash, vm.Senha) != PasswordVerificationResult.Failed;
+    
+        if (usuario == null || !senhaConfere)
+        {
+            ModelState.AddModelError(string.Empty, "E-mail ou senha inválidos.");
+            return View(vm);
+        }
+
+        // cra chá
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+            new Claim(ClaimTypes.Name, usuario.Nome),
+            new Claim(ClaimTypes.Email, usuario.Email)
+        };
+        var identidade = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identidade));
+
+        if(!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+        return RedirectToAction("Criar", "Consulta");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Sair()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
 }
