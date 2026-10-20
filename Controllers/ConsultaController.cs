@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AutoDiagnostico.Data;
 using AutoDiagnostico.Models;
 using AutoDiagnostico.Services;
@@ -69,9 +70,14 @@ public class ConsultaController : Controller
             resultado.AvisoOficinas = ex.Message;
         }
 
-        // 4. Salva a consulta no banco
+        // 4. Salva a consulta no banco, ligada a quem está logado (sem login, fica sem dono)
+        //    É esse UsuarioId que a tela "Meu histórico" usa para achar as consultas
+        var idTexto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        int? usuarioId = int.TryParse(idTexto, out var id) ? id : null;
+
         var consulta = new Consulta
         {
+            UsuarioId = usuarioId,
             Sintoma = form.Sintoma,
             Localizacao = form.Endereco,
             DataHora = DateTime.Now,
