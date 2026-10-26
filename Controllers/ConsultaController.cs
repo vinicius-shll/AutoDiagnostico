@@ -3,12 +3,15 @@ using AutoDiagnostico.Models;
 using AutoDiagnostico.Services;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AutoDiagnostico.Controllers;
 
 // O "maestro" da consulta: recebe o formulário, pede o diagnóstico e as oficinas,
 // salva no banco e mostra o resultado. Dono: Vinicius.
 // Telas (Gabriel): Views/Consulta/Criar.cshtml e Views/Consulta/Resultado.cshtml.
+[Authorize]
 public class ConsultaController : Controller
 {
     private readonly IDiagnosticoService _diagnostico;
@@ -69,9 +72,18 @@ public class ConsultaController : Controller
             resultado.AvisoOficinas = ex.Message;
         }
 
+        // Descobre quem está logado (o Id foi guardado no crachá pelo login)
+        var idTexto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        int? usuarioId = null;
+        if (int.TryParse(idTexto, out var id))
+        {
+            usuarioId = id;
+        }
+
         // 4. Salva a consulta no banco
         var consulta = new Consulta
         {
+            UsuarioId = usuarioId,
             Sintoma = form.Sintoma,
             Localizacao = form.Endereco,
             DataHora = DateTime.Now,
