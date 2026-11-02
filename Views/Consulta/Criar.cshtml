@@ -1,84 +1,36 @@
 @model AutoDiagnostico.Models.ConsultaFormViewModel
-
 @{
     ViewData["Title"] = "Fazer diagnóstico";
 }
-
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-
-        <h1 class="mb-2">Fazer diagnóstico</h1>
-
-        <p class="text-muted mb-4">
-            Quanto mais detalhes, melhor: quando acontece,
-            que barulho é, se acende alguma luz no painel.
-        </p>
-
-        <div class="card">
-            <div class="card-body">
-
-                <form asp-action="Criar"
-                      method="post"
-                      id="formDiagnostico">
-
-                    <div class="mb-3">
-                        <label asp-for="Sintoma"
-                               class="form-label fw-semibold">
-                            O que o carro está fazendo?
-                        </label>
-
-                        <textarea asp-for="Sintoma"
-                                  class="form-control"
-                                  rows="5"
-                                  placeholder="Ex.: quando eu freio, aparece um barulho metálico e o volante treme."></textarea>
-
-                        <span asp-validation-for="Sintoma"
-                              class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-4">
-                        <label asp-for="Endereco"
-                               class="form-label fw-semibold">
-                            Onde você está? (endereço ou CEP)
-                        </label>
-
-                        <input asp-for="Endereco"
-                               class="form-control"
-                               placeholder="Ex.: Rua XV de Novembro, 100, Curitiba ou 80020-310" />
-
-                        <span asp-validation-for="Endereco"
-                              class="text-danger"></span>
-                    </div>
-
-                    <button type="submit"
-                            class="btn btn-primary btn-lg w-100"
-                            id="botaoDiagnosticar">
-                        Diagnosticar
-                    </button>
-
-                </form>
-
+<div class="ad-page-heading" data-ad-reveal><a class="ad-back" asp-controller="Home" asp-action="Index">← Início</a><p class="ad-eyebrow">NOVA CONSULTA / NEO DRIVE</p><h1>Todo sinal tem<br /><span class="ad-gradient-text">uma história.</span></h1><p class="ad-lead">Conte a do seu carro. Vamos ajudar a entender o próximo passo.</p></div>
+<div class="ad-form-layout">
+    <section class="ad-panel ad-form-panel" aria-labelledby="form-title" data-ad-reveal>
+        <div class="ad-panel-heading"><span class="ad-dot"></span><h2 id="form-title">Descreva o problema</h2><span class="ad-micro">ENTRADA / 01</span></div>
+        <form asp-action="Criar" method="post" id="formDiagnostico">
+            <div asp-validation-summary="ModelOnly" class="ad-validation" role="alert"></div>
+            <div class="ad-field">
+                <label asp-for="Sintoma">O que o carro está fazendo?</label>
+                <textarea asp-for="Sintoma" class="form-control" rows="6" required minlength="15" maxlength="1000" aria-describedby="sintoma-ajuda sintoma-contador sintoma-erro" placeholder="Ex.: quando eu freio, ouço um barulho metálico e o volante treme. Começou ontem, principalmente em baixa velocidade."></textarea>
+                <div class="ad-field-meta"><span id="sintoma-ajuda">Entre 15 e 1.000 caracteres.</span><span id="sintoma-contador" data-ad-counter-for="Sintoma">@(Model.Sintoma?.Length ?? 0) / 1.000</span></div>
+                <span asp-validation-for="Sintoma" id="sintoma-erro" class="ad-validation"></span>
             </div>
-        </div>
-
-    </div>
+            <div class="ad-field">
+                <label asp-for="Endereco">Onde você está?</label>
+                <input asp-for="Endereco" class="form-control" required minlength="5" maxlength="200" autocomplete="street-address" aria-describedby="endereco-ajuda endereco-erro" placeholder="Endereço completo ou CEP" />
+                <p id="endereco-ajuda" class="ad-field-meta">Inclua a cidade para facilitar a busca por oficinas. De 5 a 200 caracteres.</p>
+                <span asp-validation-for="Endereco" id="endereco-erro" class="ad-validation"></span>
+            </div>
+            <button type="submit" class="ad-button ad-button-primary ad-submit" id="botaoDiagnosticar"><span data-ad-button-label>Analisar os sinais</span><span class="ad-submit-arrow" aria-hidden="true">↗</span><span class="ad-spinner" aria-hidden="true"></span></button>
+            <p class="ad-submit-status" id="ad-submit-status" role="status" aria-live="polite" aria-atomic="true"></p>
+            <p class="ad-form-footnote">Orientação por IA. A avaliação de um mecânico continua essencial.</p>
+        </form>
+    </section>
+    <aside class="ad-form-aside" aria-labelledby="tips-title" data-ad-reveal>
+        <p class="ad-eyebrow">UM BOM RELATO FAZ DIFERENÇA</p><h2 id="tips-title">Os detalhes<br />dão a direção.</h2>
+        <ol class="ad-tips"><li><strong>Quando acontece?</strong><span>Ao ligar, acelerar, frear ou fazer uma curva?</span></li><li><strong>O que você percebe?</strong><span>Descreva sons, cheiros, vibrações ou luzes no painel.</span></li><li><strong>O que mudou?</strong><span>Conte quando começou e se acontece com frequência.</span></li></ol>
+        <div class="ad-aside-note"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 17H3L12 3Z M12 9v5m0 2v1" /></svg><p>Não é preciso conhecer mecânica. Use suas palavras e relate apenas o que observou.</p></div>
+    </aside>
 </div>
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        document.getElementById("formDiagnostico")
-            .addEventListener("submit", function () {
-
-                if (window.jQuery && !$(this).valid()) {
-                    return;
-                }
-
-                var botao = document.getElementById("botaoDiagnosticar");
-
-                botao.disabled = true;
-                botao.textContent = "Analisando... aguarde alguns segundos";
-            });
-    </script>
 }

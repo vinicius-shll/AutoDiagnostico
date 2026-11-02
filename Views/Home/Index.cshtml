@@ -1,72 +1,35 @@
-﻿@{
+@{
     ViewData["Title"] = "Início";
 }
-
-<div class="p-5 mb-4 bg-light rounded-3 text-center">
-    <h1 class="display-5 fw-bold">
-        O seu carro está estranho?
-    </h1>
-
-    <p class="fs-5 mb-4">
-        Descreva o problema com as suas palavras.
-        A inteligência artificial sugere o que pode ser
-        e mostra oficinas mecânicas perto de você.
-    </p>
-
-    <a class="btn btn-primary btn-lg"
-       asp-controller="Consulta"
-       asp-action="Criar">
-        Fazer diagnóstico
-    </a>
-</div>
-
-<div class="row text-center g-4">
-
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h2 class="h5">1. Descreva</h2>
-
-                <p class="mb-0">
-                    Conte o que o carro está fazendo:
-                    um barulho, um cheiro,
-                    uma luz no painel.
-                </p>
-            </div>
+<section class="ad-hero" aria-labelledby="hero-title">
+    <div class="ad-hero-copy" data-ad-reveal>
+        <p class="ad-eyebrow"><span class="ad-dot"></span> INTELIGÊNCIA AUTOMOTIVA</p>
+        <h1 id="hero-title">Seu carro fala.<br /><span>Entenda os sinais.</span></h1>
+        <p class="ad-lead">Do primeiro ruído ao próximo passo. Descreva o que está acontecendo e receba orientação por IA, com oficinas perto de você.</p>
+        <div class="ad-actions">
+            <a class="ad-button ad-button-primary" asp-controller="Consulta" asp-action="Criar">Fazer diagnóstico <span aria-hidden="true">↗</span></a>
+            <a class="ad-text-link" href="#como-funciona">Explore como funciona <span aria-hidden="true">↓</span></a>
         </div>
+        <div class="ad-hero-note"><span class="ad-note-line" aria-hidden="true"></span>Suas palavras. Uma orientação mais clara.</div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h2 class="h5">2. Receba o diagnóstico</h2>
-
-                <p class="mb-0">
-                    A IA explica as causas mais prováveis
-                    e o quanto o problema é grave.
-                </p>
-            </div>
-        </div>
+    <figure class="ad-vehicle-stage" data-ad-reveal data-ad-tilt aria-label="Ilustração conceitual de um veículo com linhas de análise automotiva">
+        <div class="ad-stage-top" aria-hidden="true"><span>NEO DRIVE / CONCEPT</span><span class="ad-cross">+</span></div>
+        <div class="ad-orbit" aria-hidden="true"></div>
+        <img class="ad-vehicle" src="~/images/gabriel-ui/neo-drive.svg" asp-append-version="true" width="820" height="520" alt="" fetchpriority="high" />
+        <div class="ad-scan" aria-hidden="true"></div>
+        <span class="ad-hud ad-hud-one" aria-hidden="true"><i></i> SINAIS DO VEÍCULO</span>
+        <span class="ad-hud ad-hud-two" aria-hidden="true"><i></i> ORIENTAÇÃO POR IA</span>
+        <figcaption><span class="ad-dot"></span> VISUAL CONCEITUAL <span>ENGENHARIA + INTELIGÊNCIA</span></figcaption>
+    </figure>
+</section>
+<div class="ad-capabilities" aria-label="Recursos da plataforma"><span>DESCRIÇÃO EM LINGUAGEM NATURAL</span><span>ORIENTAÇÃO POR IA</span><span>BUSCA DE OFICINAS</span></div>
+<section id="como-funciona" class="ad-section" aria-labelledby="steps-title">
+    <div class="ad-section-heading" data-ad-reveal><div><p class="ad-eyebrow">DA DÚVIDA À DIREÇÃO</p><h2 id="steps-title">Menos incerteza.<br />Mais direção.</h2></div><p>Um caminho simples para entender o problema e procurar ajuda profissional.</p></div>
+    <div class="ad-step-grid">
+        <article class="ad-panel ad-step" data-ad-reveal data-ad-tilt><div class="ad-step-top"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H9l-5 4V4Z M8 8h8M8 12h5" /></svg><span>01 / RELATO</span></div><h3>Conte o que mudou.</h3><p>Um ruído ao frear? Uma luz no painel? Descreva os sinais com suas próprias palavras.</p><span class="ad-step-line" aria-hidden="true"></span></article>
+        <article class="ad-panel ad-step" data-ad-reveal data-ad-tilt><div class="ad-step-top"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8v8H8zM9 3v5m6-5v5M9 16v5m6-5v5M3 9h5m-5 6h5m8-6h5m-5 6h5" /></svg><span>02 / ANÁLISE</span></div><h3>Entenda as possibilidades.</h3><p>A IA organiza possíveis causas, gravidade e a especialidade recomendada para avaliação.</p><span class="ad-step-line" aria-hidden="true"></span></article>
+        <article class="ad-panel ad-step" data-ad-reveal data-ad-tilt><div class="ad-step-top"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z" /><circle cx="12" cy="10" r="2" /></svg><span>03 / PRÓXIMO PASSO</span></div><h3>Encontre ajuda por perto.</h3><p>Consulte oficinas próximas ao endereço informado e escolha onde buscar atendimento.</p><span class="ad-step-line" aria-hidden="true"></span></article>
     </div>
-
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h2 class="h5">3. Encontre uma oficina</h2>
-
-                <p class="mb-0">
-                    Veja as oficinas mais próximas,
-                    com destaque para as especialistas
-                    no seu problema.
-                </p>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<p class="text-muted small text-center mt-4">
-    O diagnóstico é uma orientação gerada por
-    inteligência artificial e não substitui
-    a avaliação de um mecânico.
-</p>
+</section>
+<section class="ad-bottom-cta ad-panel" data-ad-reveal aria-labelledby="ready-title"><div><p class="ad-eyebrow">O PRÓXIMO PASSO COMEÇA AQUI</p><h2 id="ready-title">Dê atenção aos sinais.</h2><p>Comece pelo que você percebeu. Nós ajudamos a organizar.</p></div><a class="ad-button ad-button-primary" asp-controller="Consulta" asp-action="Criar">Descrever meu problema <span aria-hidden="true">↗</span></a></section>
+<p class="ad-disclaimer">Orientação gerada por inteligência artificial. Não substitui a avaliação de um mecânico profissional.</p>

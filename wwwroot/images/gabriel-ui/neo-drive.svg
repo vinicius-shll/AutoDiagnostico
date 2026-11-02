@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="520" viewBox="0 0 820 520" fill="none">
+<defs>
+<linearGradient id="body" x1="400" y1="170" x2="430" y2="375" gradientUnits="userSpaceOnUse"><stop stop-color="#7D9DB5"/><stop offset=".28" stop-color="#314B60"/><stop offset=".65" stop-color="#152737"/><stop offset="1" stop-color="#09131F"/></linearGradient>
+<linearGradient id="hood" x1="208" y1="213" x2="300" y2="346" gradientUnits="userSpaceOnUse"><stop stop-color="#728CA4"/><stop offset=".5" stop-color="#2D485F"/><stop offset="1" stop-color="#112233"/></linearGradient>
+<linearGradient id="glass" x1="330" y1="153" x2="474" y2="250" gradientUnits="userSpaceOnUse"><stop stop-color="#29465A"/><stop offset=".6" stop-color="#081622"/><stop offset="1" stop-color="#123C4A"/></linearGradient>
+<linearGradient id="rim"><stop stop-color="#163042"/><stop offset=".5" stop-color="#7D9DAD"/><stop offset="1" stop-color="#102032"/></linearGradient>
+<radialGradient id="glow"><stop stop-color="#37D8F6" stop-opacity=".18"/><stop offset="1" stop-color="#37D8F6" stop-opacity="0"/></radialGradient>
+<filter id="shadow" x="-.3" y="-1" width="1.6" height="3"><feGaussianBlur stdDeviation="12"/></filter>
+<filter id="lamp" x="-.3" y="-2" width="1.6" height="5"><feGaussianBlur stdDeviation="3"/></filter>
+</defs>
+<ellipse cx="410" cy="369" rx="300" ry="68" fill="url(#glow)"/>
+<ellipse cx="411" cy="369" rx="263" ry="25" fill="#00060D" opacity=".8" filter="url(#shadow)"/>
+<!-- Original coupe: front three-quarter perspective, not a branded vehicle. -->
+<g transform="rotate(-4 410 275)">
+<!-- Rear wheel -->
+<ellipse cx="636" cy="307" rx="38" ry="60" fill="#050A11" stroke="#233B4D" stroke-width="3"/>
+<ellipse cx="636" cy="308" rx="25" ry="44" fill="url(#rim)"/><ellipse cx="636" cy="308" rx="20" ry="37" fill="#081320" stroke="#5B8496"/>
+<path d="m636 272-3 27-13-15 9 25-12 15 16-7 4 27 4-29 13 15-10-23 10-20-15 11-3-26Z" fill="#7A9AAA" opacity=".7"/><ellipse cx="636" cy="308" rx="6" ry="10" fill="#263F51"/>
+<!-- Main silhouette -->
+<path d="m123 299 12-42 93-41 80-23 58-53c18-17 42-22 73-18l105 15c28 4 49 16 72 35l45 43 39 15 6 48-21 26-11 5c-1-40-15-66-37-66-25 0-41 31-42 74l-204 33-34-7-10-41-187 26-31-29Z" fill="url(#body)" stroke="#5D849C" stroke-width="1.4"/>
+<!-- Roof rail and glass -->
+<path d="m315 194 62-51c12-10 32-13 54-10l99 14c22 3 45 15 65 31l33 32-167 4-146-20Z" fill="#0A1723" stroke="#8EABB9"/>
+<path d="m326 193 57-44c12-9 28-11 44-9l31 5-8 60-124-12Z" fill="url(#glass)" stroke="#3B657A"/>
+<path d="m469 147 58 9c22 4 40 13 55 25l25 24-145 1 7-59Z" fill="url(#glass)" stroke="#3B657A"/>
+<path d="m536 158 31 48" stroke="#8096A6" stroke-width="3"/>
+<path d="m337 187 47-34c12-7 31-8 44-7" stroke="#81C8DD" opacity=".6"/>
+<!-- Hood -->
+<path d="m137 258 95-38 82-22 140 20-86 70-231-30Z" fill="url(#hood)" stroke="#688B9F"/>
+<path d="m174 254 130-45 98 12-63 52-165-19Z" fill="#5E7E97" opacity=".13"/>
+<path d="m307 211-85 39m183-28-57 48" stroke="#AFCDDA" stroke-opacity=".36"/>
+<!-- Front fascia -->
+<path d="m129 270 238 26 6 45-194 15-45-20-5-66Z" fill="#102332" stroke="#416277"/>
+<path d="m150 297 191 8-2 30-166 8-22-12-1-34Z" fill="#060E19" stroke="#2A485D"/>
+<path d="m174 308 143 5m-146 7 146 3m-144 7 143 1" stroke="#294357" stroke-width="2"/>
+<path d="m135 275 66 8 16 10-69-5-13-13Zm139 15 83 5-13 11-67-7-3-9Z" fill="#C9F8FF"/>
+<path d="m135 275 66 8 16 10-69-5-13-13Zm139 15 83 5-13 11-67-7-3-9Z" fill="#37D8F6" filter="url(#lamp)" opacity=".9"/>
+<path d="m145 339 35 10 169-8" stroke="#37D8F6" stroke-width="1.5"/>
+<!-- Side sculpting -->
+<path d="m371 287 87-66 166-1 46 13" stroke="#B8D6E5" stroke-opacity=".65"/>
+<path d="m449 237 154-12-18 92-152 29 16-109Z" fill="#0B1D2B" fill-opacity=".25" stroke="#4D6C81"/>
+<path d="m467 242 36-3" stroke="#91B5C6" stroke-width="2" stroke-linecap="round"/>
+<path d="m435 322 145-25" stroke="#6C94AB" stroke-opacity=".55"/>
+<path d="m435 344 151-27" stroke="#37D8F6" stroke-opacity=".8"/>
+<!-- Mirror -->
+<path d="m437 215-12 13 25 3 13-9-7-9-19 2Z" fill="#162F42" stroke="#7CABB9"/>
+<!-- Front wheel and arch -->
+<path d="M356 338c-3-53 12-86 39-90 27-3 45 31 45 76" stroke="#102231" stroke-width="10"/>
+<ellipse cx="398" cy="321" rx="39" ry="61" fill="#050A11" stroke="#416072" stroke-width="2"/>
+<ellipse cx="398" cy="322" rx="27" ry="46" fill="url(#rim)"/><ellipse cx="398" cy="322" rx="22" ry="39" fill="#091623" stroke="#9ABBC7" stroke-width="1.3"/>
+<path d="m398 284-4 29-14-18 10 27-11 20 16-10 4 28 4-29 13 15-9-26 10-22-15 15-4-29Z" fill="#93B2C0"/><ellipse cx="398" cy="322" rx="7" ry="11" fill="#203D50" stroke="#A3D0DA"/>
+<path d="M377 298c-9 20-7 42 3 56" stroke="#37D8F6" opacity=".5"/>
+<!-- Technical fine highlights -->
+<path d="m125 261 9-5m515-32 15 5m-290-94 23-7" stroke="#B3EFF9" stroke-width="2"/>
+</g>
+<path d="M166 415h144m200 0h145M139 412v6m543-6v6" stroke="#37D8F6" stroke-opacity=".3"/>
+<path d="m403 410 7 5-7 5m14-10-7 5 7 5" stroke="#37D8F6" stroke-opacity=".5"/>
+</svg>

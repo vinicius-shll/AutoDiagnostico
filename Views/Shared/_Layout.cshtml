@@ -1,112 +1,61 @@
-﻿<!DOCTYPE html>
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var ownedPage = (controller == "Home" && (action == "Index" || action == "Error")) || controller == "Consulta";
+}
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070B14" />
     <title>@(ViewData["Title"]) - AutoDiagnóstico</title>
-
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
-
-    <link rel="stylesheet"
-          href="~/AutoDiagnostico.styles.css"
-          asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AutoDiagnostico.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/gabriel-ui.css" asp-append-version="true" />
 </head>
-
-<body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-            <div class="container">
-
-                <a class="navbar-brand fw-bold"
-                   asp-controller="Home"
-                   asp-action="Index">
-                    AutoDiagnóstico
+<body class="ad-app">
+    <a class="ad-skip" href="#conteudo">Pular para o conteúdo</a>
+    <header class="ad-header">
+        <nav class="navbar navbar-expand-lg navbar-dark ad-nav" aria-label="Navegação principal">
+            <div class="container ad-container">
+                <a class="navbar-brand ad-brand" asp-controller="Home" asp-action="Index">
+                    <svg class="ad-brand-mark" viewBox="0 0 36 36" aria-hidden="true"><path d="M5 27 16 7h5l10 20M10 20h16M15 27l4-8" /></svg>
+                    <span>Auto<span class="ad-brand-light">Diagnóstico</span><small>NEO DRIVE</small></span>
                 </a>
-
-                <button class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#menuPrincipal"
-                        aria-controls="menuPrincipal"
-                        aria-expanded="false"
-                        aria-label="Abrir menu">
-
+                <button class="navbar-toggler ad-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir ou fechar menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-
-                <div class="collapse navbar-collapse"
-                     id="menuPrincipal">
-
-                    <ul class="navbar-nav me-auto">
-
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-controller="Home"
-                               asp-action="Index">
-                                Início
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-controller="Consulta"
-                               asp-action="Criar">
-                                Fazer diagnóstico
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-controller="Historico"
-                               asp-action="Index">
-                                Meu histórico
-                            </a>
-                        </li>
-
+                <div class="collapse navbar-collapse" id="menuPrincipal">
+                    <ul class="navbar-nav mx-auto ad-nav-links">
+                        <li class="nav-item"><a class="nav-link" aria-current="@(controller == "Home" && action == "Index" ? "page" : null)" asp-controller="Home" asp-action="Index">Início</a></li>
+                        <li class="nav-item"><a class="nav-link" aria-current="@(controller == "Consulta" ? "page" : null)" asp-controller="Consulta" asp-action="Criar">Fazer diagnóstico</a></li>
+                        <li class="nav-item"><a class="nav-link" aria-current="@(controller == "Historico" ? "page" : null)" asp-controller="Historico" asp-action="Index">Meu histórico</a></li>
                     </ul>
-
-                    <partial name="_LoginPartial" />
-
+                    <div class="ad-account"><partial name="_LoginPartial" /></div>
                 </div>
             </div>
         </nav>
+        <noscript><div class="ad-noscript"><a asp-controller="Consulta" asp-action="Criar">Diagnóstico</a><a asp-controller="Historico" asp-action="Index">Histórico</a><partial name="_LoginPartial" /></div></noscript>
     </header>
-
-    <div class="container">
-        <main role="main" class="pb-3">
-
-            @if (TempData["Mensagem"] is string mensagem)
-            {
-                <div class="alert alert-success" role="alert">
-                    @mensagem
-                </div>
-            }
-
-            @RenderBody()
-
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted py-3 mt-5">
-        <div class="container">
-            &copy; 2026 - AutoDiagnóstico
+    <main id="conteudo" tabindex="-1" class="container ad-container ad-main @(ownedPage ? "" : "ad-legacy")">
+        @if (TempData["Mensagem"] is string mensagem)
+        {
+            <div class="ad-notice ad-notice-success" role="status">@mensagem</div>
+        }
+        @RenderBody()
+    </main>
+    <footer class="ad-footer">
+        <div class="container ad-container ad-footer-inner">
+            <div><strong>AutoDiagnóstico<span class="ad-accent">.</span></strong><p>Tecnologia para entender. Clareza para decidir.</p></div>
+            <span>&copy; @DateTime.Now.Year AutoDiagnóstico <span class="ad-footer-edition">/ NEO DRIVE</span></span>
         </div>
     </footer>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script src="~/js/site.js"
-            asp-append-version="true"></script>
-
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/gabriel-ui.js" asp-append-version="true"></script>
 </body>
 </html>

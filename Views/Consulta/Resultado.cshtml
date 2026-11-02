@@ -1,118 +1,77 @@
 @model AutoDiagnostico.Models.ResultadoViewModel
 @{
     ViewData["Title"] = "Resultado do diagnóstico";
-
-    // Classes Bootstrap para indicar visualmente a gravidade do problema.
     var cor = Model.Diagnostico?.Gravidade switch
     {
-        "Alta" => "danger",
-        "Média" => "warning",
-        "Baixa" => "success",
-        _ => "secondary"
+        "Alta" => "high",
+        "Média" => "medium",
+        "Baixa" => "low",
+        _ => "unknown"
     };
 }
-
-<h1 class="mb-1">Resultado do diagnóstico</h1>
-<p class="text-muted mb-4">Você descreveu: "@(Model.Sintoma)"</p>
-
-@* BLOCO 1: DIAGNÓSTICO *@
-<h2 class="h4">O que pode ser</h2>
-
-@if (!string.IsNullOrEmpty(Model.AvisoDiagnostico))
-{
-    <div class="alert alert-warning" role="alert">@(Model.AvisoDiagnostico)</div>
-}
-else if (Model.Diagnostico != null)
-{
-    <div class="card border-@cor mb-4">
-        <div class="card-header d-flex flex-wrap justify-content-between gap-2">
-            <span>
-                Gravidade:
-                <span class="badge bg-@cor">@(Model.Diagnostico.Gravidade)</span>
-            </span>
-            <span>Procure: <strong>@(Model.Diagnostico.Especialidade)</strong></span>
+<div class="ad-page-heading ad-result-heading" data-ad-reveal><div><p class="ad-eyebrow">SUA CONSULTA / NEO DRIVE</p><h1>Mais clareza.<br /><span class="ad-gradient-text">Seu próximo passo.</span></h1></div><a class="ad-button ad-button-secondary" asp-controller="Consulta" asp-action="Criar">Nova consulta <span aria-hidden="true">↗</span></a></div>
+<section class="ad-context ad-panel" aria-labelledby="relato-title" data-ad-reveal><p class="ad-eyebrow" id="relato-title">O QUE VOCÊ RELATOU</p><p class="ad-user-text">@Model.Sintoma</p><div class="ad-location"><span aria-hidden="true">⌖</span> @Model.Endereco</div></section>
+<section class="ad-section ad-analysis" aria-labelledby="analysis-title">
+    <div class="ad-section-heading" data-ad-reveal><div><p class="ad-eyebrow">01 / ORIENTAÇÃO</p><h2 id="analysis-title">O que pode ser</h2></div><span class="ad-micro">ANÁLISE POR INTELIGÊNCIA ARTIFICIAL</span></div>
+    @if (!string.IsNullOrEmpty(Model.AvisoDiagnostico))
+    {
+        <div class="ad-notice" role="alert"><strong>Não foi possível obter o diagnóstico.</strong><p>@Model.AvisoDiagnostico</p></div>
+    }
+    else if (Model.Diagnostico != null)
+    {
+        <div class="ad-diagnosis-grid">
+            <article class="ad-panel ad-diagnosis" data-ad-reveal><p class="ad-eyebrow">RESUMO DA ANÁLISE</p><h3>Entendendo os sinais</h3><p class="ad-summary ad-user-text">@Model.Diagnostico.Resumo</p>
+                @if (Model.Diagnostico.PossiveisCausas?.Count > 0)
+                {
+                    <h4 class="ad-small-title">Possíveis causas</h4><ul class="ad-causes">@foreach (var causa in Model.Diagnostico.PossiveisCausas) { <li>@causa</li> }</ul>
+                }
+                else
+                {
+                    <p class="ad-muted">Nenhuma causa específica foi informada nesta análise.</p>
+                }
+            </article>
+            <aside class="ad-panel ad-severity ad-severity-@cor" data-ad-reveal aria-label="Gravidade e especialidade recomendada"><p class="ad-eyebrow">ATENÇÃO RECOMENDADA</p><span class="ad-severity-symbol" aria-hidden="true">!</span><h3>Gravidade <strong>@(string.IsNullOrWhiteSpace(Model.Diagnostico.Gravidade) ? "não informada" : Model.Diagnostico.Gravidade)</strong></h3><div class="ad-severity-track" aria-hidden="true"><i></i><i></i><i></i></div><div class="ad-specialty"><span>Especialidade recomendada</span><strong>@Model.Diagnostico.Especialidade</strong></div><p>Confirme a orientação e a gravidade com um mecânico.</p></aside>
         </div>
-        <div class="card-body">
-            <p class="card-text">@(Model.Diagnostico.Resumo)</p>
-
-            @if (Model.Diagnostico.PossiveisCausas.Count > 0)
+    }
+    else
+    {
+        <div class="ad-notice" role="status"><strong>Diagnóstico indisponível no momento.</strong><p>Tente uma nova consulta. Você também pode procurar avaliação mecânica profissional.</p></div>
+    }
+    <p class="ad-disclaimer ad-align-left">Orientação gerada por inteligência artificial. Não substitui a avaliação de um mecânico profissional.</p>
+</section>
+<section class="ad-section ad-workshops" aria-labelledby="workshops-title">
+    <div class="ad-section-heading" data-ad-reveal><div><p class="ad-eyebrow">02 / PERTO DE VOCÊ</p><h2 id="workshops-title">Encontre ajuda especializada.</h2><p>Oficinas perto de: @Model.Endereco</p></div></div>
+    @if (!string.IsNullOrEmpty(Model.AvisoOficinas))
+    {
+        <div class="ad-notice" role="alert"><strong>A busca por oficinas não foi concluída.</strong><p>@Model.AvisoOficinas</p></div>
+    }
+    else if (Model.Oficinas == null || Model.Oficinas.Count == 0)
+    {
+        <div class="ad-panel ad-empty" role="status"><span class="ad-empty-symbol" aria-hidden="true">⌖</span><h3>Nenhuma oficina encontrada por aqui.</h3><p>Tente um endereço mais completo, com cidade, ou um CEP.</p><a class="ad-text-link" asp-controller="Consulta" asp-action="Criar">Consultar outro endereço →</a></div>
+    }
+    else
+    {
+        <div class="ad-workshop-grid">
+            @foreach (var oficina in Model.Oficinas)
             {
-                <h3 class="h6">Possíveis causas</h3>
-                <ul class="mb-0">
-                    @foreach (var causa in Model.Diagnostico.PossiveisCausas)
+                var distancia = "";
+                if (oficina.DistanciaMetros != null)
+                {
+                    distancia = oficina.DistanciaMetros < 1000
+                        ? $"{oficina.DistanciaMetros:0} m"
+                        : $"{oficina.DistanciaMetros / 1000:0.0} km";
+                }
+                <article class="ad-panel ad-workshop @(oficina.Destaque ? "ad-workshop-highlight" : "")" data-ad-reveal>
+                    <div class="ad-workshop-top"><span class="ad-workshop-icon" aria-hidden="true">⌖</span>@if (!string.IsNullOrEmpty(distancia)) { <span class="ad-distance">@distancia</span> }</div>
+                    <h3>@oficina.Nome</h3><p>@oficina.Endereco</p>
+                    @if (oficina.Destaque)
                     {
-                        <li>@causa</li>
+                        <span class="ad-match">Nome relacionado à especialidade</span><p class="ad-match-note">Correspondência por nome com @(Model.Diagnostico?.Especialidade ?? "serviços automotivos"). Confirme os serviços com a oficina; não é uma certificação.</p>
                     }
-                </ul>
+                    @* MAPA: o Kauan coloca aqui o botão "Ver no mapa" (card Kauan 4/4). *@
+                </article>
             }
         </div>
-        <div class="card-footer small text-muted">
-            Orientação gerada por inteligência artificial. Confirme sempre com um mecânico.
-        </div>
-    </div>
-}
-else
-{
-    <div class="alert alert-warning" role="alert">
-        O diagnóstico não está disponível no momento. Tente uma nova consulta.
-    </div>
-}
-
-@* BLOCO 2: OFICINAS PRÓXIMAS *@
-<h2 class="h4 mt-4">Oficinas perto de: @(Model.Endereco)</h2>
-
-@if (!string.IsNullOrEmpty(Model.AvisoOficinas))
-{
-    <div class="alert alert-warning" role="alert">@(Model.AvisoOficinas)</div>
-}
-else if (Model.Oficinas.Count == 0)
-{
-    <div class="alert alert-info" role="status">
-        Não encontramos oficinas mecânicas perto desse endereço.
-        Tente um endereço mais completo ou um CEP.
-    </div>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-2 g-3">
-        @foreach (var oficina in Model.Oficinas)
-        {
-            var distancia = "";
-            if (oficina.DistanciaMetros != null)
-            {
-                distancia = oficina.DistanciaMetros < 1000
-                    ? $"{oficina.DistanciaMetros:0} m"
-                    : $"{oficina.DistanciaMetros / 1000:0.0} km";
-            }
-
-            <div class="col">
-                <div class="card h-100 @(oficina.Destaque ? "border-success" : "")">
-                    <div class="card-body">
-                        <h3 class="h5 card-title">@oficina.Nome</h3>
-
-                        @if (oficina.Destaque)
-                        {
-                            <span class="badge bg-success mb-2">
-                                Especialista em @(Model.Diagnostico?.Especialidade ?? "serviços automotivos")
-                            </span>
-                        }
-
-                        <p class="card-text mb-1">@oficina.Endereco</p>
-                        @if (!string.IsNullOrEmpty(distancia))
-                        {
-                            <p class="card-text text-muted small mb-0">@distancia</p>
-                        }
-
-                        @* MAPA: o Kauan coloca aqui o botão "Ver no mapa" (card Kauan 4/4). *@
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-}
-
-<div class="mt-4">
-    <a class="btn btn-primary" asp-controller="Consulta" asp-action="Criar">
-        Fazer nova consulta
-    </a>
-</div>
+    }
+</section>
+<div class="ad-result-actions"><a class="ad-button ad-button-primary" asp-controller="Consulta" asp-action="Criar">Fazer nova consulta <span aria-hidden="true">↗</span></a><a class="ad-text-link" asp-controller="Home" asp-action="Index">Voltar ao início</a></div>
