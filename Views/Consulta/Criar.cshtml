@@ -10,13 +10,13 @@
             <div asp-validation-summary="ModelOnly" class="ad-validation" role="alert"></div>
             <div class="ad-field">
                 <label asp-for="Sintoma">O que o carro está fazendo?</label>
-                <textarea asp-for="Sintoma" class="form-control" rows="6" required minlength="15" maxlength="1000" aria-describedby="sintoma-ajuda sintoma-contador sintoma-erro" placeholder="Ex.: quando eu freio, ouço um barulho metálico e o volante treme. Começou ontem, principalmente em baixa velocidade."></textarea>
+                <textarea asp-for="Sintoma" class="form-control" rows="6" required maxlength="1000" aria-describedby="sintoma-ajuda sintoma-contador sintoma-erro" placeholder="Ex.: quando eu freio, ouço um barulho metálico e o volante treme. Começou ontem, principalmente em baixa velocidade."></textarea>
                 <div class="ad-field-meta"><span id="sintoma-ajuda">Entre 15 e 1.000 caracteres.</span><span id="sintoma-contador" data-ad-counter-for="Sintoma">@(Model.Sintoma?.Length ?? 0) / 1.000</span></div>
                 <span asp-validation-for="Sintoma" id="sintoma-erro" class="ad-validation"></span>
             </div>
             <div class="ad-field">
                 <label asp-for="Endereco">Onde você está?</label>
-                <input asp-for="Endereco" class="form-control" required minlength="5" maxlength="200" autocomplete="street-address" aria-describedby="endereco-ajuda endereco-erro" placeholder="Endereço completo ou CEP" />
+                <input asp-for="Endereco" class="form-control" required maxlength="200" autocomplete="street-address" aria-describedby="endereco-ajuda endereco-erro" placeholder="Endereço completo ou CEP" />
                 <p id="endereco-ajuda" class="ad-field-meta">Inclua a cidade para facilitar a busca por oficinas. De 5 a 200 caracteres.</p>
                 <span asp-validation-for="Endereco" id="endereco-erro" class="ad-validation"></span>
             </div>
