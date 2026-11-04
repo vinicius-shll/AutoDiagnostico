@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="260" viewBox="0 0 420 260" fill="none">
+<defs><radialGradient id="halo"><stop stop-color="#37D8F6" stop-opacity=".14"/><stop offset="1" stop-color="#37D8F6" stop-opacity="0"/></radialGradient><linearGradient id="road" x1="90" y1="0" x2="320" y2="240" gradientUnits="userSpaceOnUse"><stop stop-color="#557CFF"/><stop offset="1" stop-color="#37D8F6"/></linearGradient></defs>
+<ellipse cx="210" cy="135" rx="200" ry="120" fill="url(#halo)"/><circle cx="210" cy="130" r="90" stroke="#37D8F6" stroke-opacity=".14"/><circle cx="210" cy="130" r="110" stroke="#37D8F6" stroke-opacity=".08" stroke-dasharray="3 9"/>
+<path d="M76 219h73c13 0 23-10 23-23v-31m0-62V65c0-14 11-25 25-25h90" stroke="url(#road)" stroke-width="2"/><path d="M88 231h73c13 0 23-10 23-23v-36m0-69V77c0-14 11-25 25-25h90" stroke="#37D8F6" stroke-opacity=".2"/>
+<path d="m210 91 43 75h-86l43-75Z" fill="#101E30" stroke="#37D8F6" stroke-width="1.5"/><path d="M210 117v22m0 9v3" stroke="#B9F2FF" stroke-width="3" stroke-linecap="round"/><circle cx="77" cy="219" r="4" fill="#37D8F6"/><circle cx="288" cy="40" r="4" fill="#557CFF"/><path d="M72 91h12m-6-6v12m259 82h12m-6-6v12" stroke="#547286"/>
+</svg>

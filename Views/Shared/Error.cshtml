@@ -1,30 +1,13 @@
-﻿@model ErrorViewModel
-
+@model ErrorViewModel
 @{
     ViewData["Title"] = "Algo deu errado";
 }
-
-<div class="text-center py-5">
-    <h1 class="display-6 mb-3">
-        Ops, algo deu errado.
-    </h1>
-
-    <p class="fs-5 text-muted">
-        Não conseguimos concluir sua solicitação.
-        Tente novamente em alguns instantes.
-    </p>
-
-    <a class="btn btn-primary mt-2"
-       asp-controller="Home"
-       asp-action="Index">
-        Voltar para o início
-    </a>
-
+<section class="ad-error" aria-labelledby="error-title">
+    <div class="ad-error-art" data-ad-reveal><img src="~/images/gabriel-ui/route-signal.svg" asp-append-version="true" width="420" height="260" alt="" /></div>
+    <div data-ad-reveal><p class="ad-eyebrow">VAMOS RETOMAR O CAMINHO</p><h1 id="error-title">Uma pausa<br /><span class="ad-gradient-text">inesperada.</span></h1><p class="ad-lead">Não conseguimos concluir sua solicitação.<br />Tente novamente em alguns instantes.</p><a class="ad-button ad-button-primary" asp-controller="Home" asp-action="Index">Voltar para o início <span aria-hidden="true">↗</span></a>
     @if (Model.ShowRequestId)
     {
-        <p class="small text-muted mt-4">
-            Código do erro (para a equipe):
-            <code>@Model.RequestId</code>
-        </p>
+        <p class="ad-request-id">Código do erro para a equipe:<br /><code>@Model.RequestId</code></p>
     }
-</div>
+    </div>
+</section>
