@@ -68,10 +68,59 @@
                     {
                         <span class="ad-match">Nome relacionado à especialidade</span><p class="ad-match-note">Correspondência por nome com @(Model.Diagnostico?.Especialidade ?? "serviços automotivos"). Confirme os serviços com a oficina; não é uma certificação.</p>
                     }
-                    @* MAPA: o Kauan coloca aqui o botão "Ver no mapa" (card Kauan 4/4). *@
+                    @{
+                        var latitudeTexto = oficina.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        var longitudeTexto = oficina.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        var linkMapa = "https://www.google.com/maps/search/?api=1&query=" + latitudeTexto + "," + longitudeTexto;
+                        var linkMapaEmbutido = "https://www.google.com/maps?q=" + latitudeTexto + "," + longitudeTexto + "&z=17&output=embed";
+                    }
+                    <a class="btn btn-outline-primary btn-sm" href="@linkMapa" target="_blank" rel="noopener"
+                       data-bs-toggle="modal" data-bs-target="#mapaModal"
+                       data-mapa-embutido="@linkMapaEmbutido" data-mapa-nome="@oficina.Nome">Ver no mapa</a>
                 </article>
             }
+        </div>
+
+        @* Janela do mapa: abre por cima do resultado. O botão "Ver no mapa" preenche o título e o endereço do mapa. *@
+        <div class="modal fade ad-map-modal" id="mapaModal" tabindex="-1" aria-labelledby="mapaModalTitulo" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="mapaModalTitulo">Mapa</h2>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <iframe id="mapaModalFrame" title="Mapa da oficina" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                    </div>
+                    <div class="modal-footer">
+                        <a id="mapaModalLink" class="ad-text-link" href="#" target="_blank" rel="noopener">Abrir no Google Maps (rotas) ↗</a>
+                    </div>
+                </div>
+            </div>
         </div>
     }
 </section>
 <div class="ad-result-actions"><a class="ad-button ad-button-primary" asp-controller="Consulta" asp-action="Criar">Fazer nova consulta <span aria-hidden="true">↗</span></a><a class="ad-text-link" asp-controller="Home" asp-action="Index">Voltar ao início</a></div>
+
+@section Scripts {
+    <script>
+        // Quando a janela do mapa abre, pega os dados do botão clicado e carrega o mapa daquela oficina.
+        (function () {
+            var modal = document.getElementById("mapaModal");
+            if (!modal) return;
+            var frame = document.getElementById("mapaModalFrame");
+
+            modal.addEventListener("show.bs.modal", function (evento) {
+                var botao = evento.relatedTarget;
+                document.getElementById("mapaModalTitulo").textContent = botao.getAttribute("data-mapa-nome");
+                document.getElementById("mapaModalLink").href = botao.getAttribute("href");
+                frame.src = botao.getAttribute("data-mapa-embutido");
+            });
+
+            // Ao fechar, limpa o mapa para não ficar carregando por trás.
+            modal.addEventListener("hidden.bs.modal", function () {
+                frame.src = "about:blank";
+            });
+        })();
+    </script>
+}
