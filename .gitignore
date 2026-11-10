@@ -482,3 +482,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Extensão Fetch Client do VS Code (histórico local de requisições)
+.fetch-client/
