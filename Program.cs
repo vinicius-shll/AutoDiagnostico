@@ -11,11 +11,25 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Banco de dados (SQL Server via Entity Framework Core).
-// O site escolhe sozinho o SQL Server que existir nesta máquina (LocalDB ou SQLEXPRESS).
-// Ninguém precisa configurar nada. Veja EscolherConnectionString no fim deste arquivo.
-var connectionString = EscolherConnectionString(builder.Configuration);
+// Na máquina de cada um (Development): o site escolhe sozinho o SQL Server que existir
+// (LocalDB ou SQLEXPRESS). Veja EscolherConnectionString no fim deste arquivo.
+// Na hospedagem (Production): usa direto a connection string da variável de ambiente
+// ConnectionStrings__AutoDiagnosticoContext, configurada no painel da hospedagem, sem testar nada local.
+// (Sem essa variável, como no "dotnet ef migrations add", continua a escolha automática.)
+var connectionStringConfigurada = builder.Configuration.GetConnectionString("AutoDiagnosticoContext");
+var hospedado = !builder.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(connectionStringConfigurada);
+var connectionString = hospedado
+    ? connectionStringConfigurada!
+    : EscolherConnectionString(builder.Configuration);
 builder.Services.AddDbContext<AutoDiagnosticoContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sql =>
+    {
+        // Banco em outro servidor: uma queda rápida de conexão é tentada de novo antes de virar erro
+        if (hospedado)
+        {
+            sql.EnableRetryOnFailure();
+        }
+    }));
 
 // Login por cookie (cards do Luan). Quem não está logado e tenta abrir
 // uma página com [Authorize] é mandado para /Conta/Login.
@@ -115,6 +129,7 @@ static string EscolherConnectionString(IConfiguration config)
 
     throw new InvalidOperationException(
         "Nenhum SQL Server encontrado nesta máquina. Instale o SQL Server Express (qualquer tipo de instalação) " +
-        "ou o LocalDB. Se o seu SQL Server tem outro nome de instância, configure com: " +
+        "ou o LocalDB. Na hospedagem, configure a variável de ambiente ConnectionStrings__AutoDiagnosticoContext. " +
+        "Se o seu SQL Server tem outro nome de instância, configure com: " +
         "dotnet user-secrets set \"ConnectionStrings:AutoDiagnosticoContext\" \"Server=SEU_SERVIDOR;" + resto + "\"");
 }

@@ -1,10 +1,13 @@
 using AutoDiagnostico.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoDiagnostico.Controllers;
 
 // Página de TESTE do Kauan: chama a busca de oficinas sem precisar das telas.
 // Abra no navegador: http://localhost:5034/TesteOficinas?endereco=Rua XV de Novembro, Curitiba&especialidade=Elétrica
+// [Authorize]: com o site na internet, só quem está logado gasta a cota da Geoapify por aqui.
+[Authorize]
 public class TesteOficinasController : Controller
 {
     private readonly IOficinaService _oficinas;
