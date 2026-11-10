@@ -62,10 +62,13 @@ public class ConsultaController : Controller
             resultado.AvisoDiagnostico = ex.Message;
         }
 
-        // 3. Pede as oficinas. Se a busca falhar, guarda a mensagem e continua
+        // 3. Pede as oficinas e destaca as que combinam com a especialidade indicada pela IA.
+        //    Se a IA falhou, a especialidade vem vazia e a lista volta como veio.
+        //    Se a busca falhar, guarda a mensagem e continua
         try
         {
-            resultado.Oficinas = await _oficinas.BuscarProximasAsync(PrepararEndereco(form.Endereco));
+            var oficinas = await _oficinas.BuscarProximasAsync(PrepararEndereco(form.Endereco));
+            resultado.Oficinas = DestaqueOficinas.Aplicar(oficinas, resultado.Diagnostico?.Especialidade);
         }
         catch (ServicoExternoException ex)
         {

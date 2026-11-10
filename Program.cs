@@ -76,7 +76,7 @@ app.Run();
 //   2. LocalDB              — vem com o Visual Studio ou com a opção "LocalDB" do instalador do SQL Server Express
 //   3. localhost\SQLEXPRESS — o que o instalador do SQL Server Express cria na instalação "Básica"
 //   4. localhost            — SQL Server instalado como instância padrão
-// O teste conecta no banco "master", que sempre existe; o banco AutoDiagnostico é criado pelo "dotnet ef database update".
+// O teste conecta no banco "master", que sempre existe; o banco AutoDiagnostico é criado pelo Database.Migrate() ao iniciar.
 static string EscolherConnectionString(IConfiguration config)
 {
     const string resto = "Database=AutoDiagnostico;Trusted_Connection=True;TrustServerCertificate=True;";
