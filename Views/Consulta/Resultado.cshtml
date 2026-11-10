@@ -68,7 +68,12 @@
                     {
                         <span class="ad-match">Nome relacionado à especialidade</span><p class="ad-match-note">Correspondência por nome com @(Model.Diagnostico?.Especialidade ?? "serviços automotivos"). Confirme os serviços com a oficina; não é uma certificação.</p>
                     }
-                    @* MAPA: o Kauan coloca aqui o botão "Ver no mapa" (card Kauan 4/4). *@
+                    @{
+                        var latitudeTexto = oficina.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        var longitudeTexto = oficina.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        var linkMapa = "https://www.google.com/maps/search/?api=1&query=" + latitudeTexto + "," + longitudeTexto;
+                    }
+                    <a class="btn btn-outline-primary btn-sm" href="@linkMapa" target="_blank" rel="noopener">Ver no mapa</a>
                 </article>
             }
         </div>
