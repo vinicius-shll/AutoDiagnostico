@@ -1,0 +1,118 @@
+/* AutoDiagnóstico — Modo claro (NEO DRIVE LIGHT).
+   Ativado por <html data-theme="light">. O tema escuro continua sendo o de gabriel-ui.css;
+   este arquivo só sobrescreve o que muda no claro. Carregar DEPOIS de gabriel-ui.css. */
+
+/* ---------- Botão de alternar tema (vale para os dois temas) ---------- */
+.ad-theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+    width: 40px; height: 40px; margin-left: auto; margin-right: 10px; padding: 0;
+    background: transparent; color: var(--ad-ink); border: 1px solid var(--ad-line); border-radius: 9px;
+    cursor: pointer; transition: background .2s ease, border-color .2s ease;
+}
+.ad-theme-toggle:hover { border-color: var(--ad-cyan); background: rgba(55, 216, 246, .08); }
+.ad-theme-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ad-theme-toggle .ad-icon-sun { display: none; }
+[data-theme="light"] .ad-theme-toggle .ad-icon-sun { display: block; }
+[data-theme="light"] .ad-theme-toggle .ad-icon-moon { display: none; }
+@media (min-width: 992px) { .ad-theme-toggle { order: 3; margin-left: 14px; margin-right: 0; } }
+
+/* ---------- Paleta ---------- */
+[data-theme="light"] .ad-app {
+    --ad-bg: #f3f6fa; --ad-surface: #ffffff; --ad-panel: #ffffff;
+    --ad-ink: #0d1726; --ad-muted: #4c5c72;
+    --ad-cyan: #08789a;   /* acento com contraste AA sobre branco; o ciano original fica nos botões */
+    --ad-blue: #3352d1;
+    --ad-line: rgba(16, 42, 82, .14);
+    background: radial-gradient(ellipse at 80% 5%, #dbeaf6 0, transparent 40%), var(--ad-bg);
+    color-scheme: light;
+}
+
+/* ---------- Cabeçalho e navegação ---------- */
+[data-theme="light"] .ad-header { background: rgba(243, 246, 250, .9); }
+@supports (backdrop-filter: blur(16px)) { [data-theme="light"] .ad-header { background: rgba(243, 246, 250, .75); } }
+[data-theme="light"] .ad-app .ad-nav .nav-link { color: #3b4b61; }
+[data-theme="light"] .ad-app .ad-nav .nav-link:hover,
+[data-theme="light"] .ad-app .ad-nav .nav-link[aria-current="page"] { color: var(--ad-ink); }
+[data-theme="light"] .ad-menu-toggle .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2813, 23, 38, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+[data-theme="light"] .ad-skip { background: var(--ad-surface); }
+
+/* ---------- Tipografia e textos ---------- */
+[data-theme="light"] .ad-hero h1 > span,
+[data-theme="light"] .ad-gradient-text { background-image: linear-gradient(100deg, #066b8a, #0a88ad 40%, #3352d1); }
+[data-theme="light"] .ad-app .ad-text-link { color: #3b4b61; text-decoration-color: #a9bacb; }
+[data-theme="light"] .ad-text-link:hover,
+[data-theme="light"] .ad-back:hover { color: var(--ad-ink); }
+[data-theme="light"] .ad-hero-note,
+[data-theme="light"] .ad-capabilities,
+[data-theme="light"] .ad-step-top > span,
+[data-theme="light"] .ad-disclaimer,
+[data-theme="light"] .ad-micro,
+[data-theme="light"] .ad-field-meta { color: #56667c; }
+[data-theme="light"] .ad-summary { color: #27364a; }
+[data-theme="light"] .ad-causes li,
+[data-theme="light"] .ad-distance { color: #33435a; }
+[data-theme="light"] .ad-request-id code { color: #066b8a; }
+[data-theme="light"] .ad-dot { box-shadow: 0 0 10px rgba(8, 120, 154, .35); }
+
+/* ---------- Botões ---------- */
+[data-theme="light"] .ad-button-primary { box-shadow: 0 6px 22px rgba(8, 120, 154, .22), inset 0 1px 0 #ffffff80; }
+[data-theme="light"] .ad-button-primary:hover { box-shadow: 0 9px 28px rgba(8, 120, 154, .3); }
+[data-theme="light"] .ad-app .ad-button-secondary { background: #ffffff; color: var(--ad-ink); border-color: rgba(16, 42, 82, .2); }
+[data-theme="light"] .ad-button-secondary:hover { background: #e9f1f8; }
+
+/* ---------- Painéis e cartões ---------- */
+[data-theme="light"] .ad-panel {
+    background: linear-gradient(135deg, #ffffff, #f8fbfd);
+    box-shadow: 0 1px 2px rgba(16, 42, 82, .05), 0 10px 30px rgba(16, 42, 82, .06);
+}
+[data-theme="light"] .ad-step::before { background: radial-gradient(220px circle at var(--ad-x,50%) var(--ad-y,50%), rgba(8, 120, 154, .07), transparent); }
+[data-theme="light"] .ad-step:hover,
+[data-theme="light"] .ad-workshop-highlight { border-color: rgba(8, 120, 154, .4); }
+[data-theme="light"] .ad-bottom-cta { background: radial-gradient(ellipse at 0 0, #d6ecf6, transparent 75%), #ffffff; }
+
+/* Palco do carro: continua escuro de propósito (funciona como uma "tela" e a ilustração foi feita para fundo escuro). */
+[data-theme="light"] .ad-vehicle-stage {
+    --ad-cyan: #37d8f6; --ad-ink: #f3f7ff;
+    background: radial-gradient(ellipse at 50% 55%, #163d52, transparent 64%), #0a1220;
+    border-color: rgba(16, 42, 82, .25);
+    box-shadow: 0 18px 45px rgba(16, 42, 82, .18);
+}
+[data-theme="light"] .ad-vehicle-stage .ad-dot { box-shadow: 0 0 12px #37d8f666; }
+
+/* ---------- Formulário de diagnóstico ---------- */
+[data-theme="light"] .ad-form-panel .form-control,
+[data-theme="light"] .ad-legacy .form-control { background: #ffffff; color: var(--ad-ink); border-color: #b4c2d3; }
+[data-theme="light"] .ad-form-panel .form-control::placeholder { color: #6a7a8f; }
+[data-theme="light"] .ad-form-panel .form-control:focus { border-color: var(--ad-cyan); box-shadow: 0 0 0 3px rgba(8, 120, 154, .16); }
+[data-theme="light"] .ad-form-panel .input-validation-error { border-color: #c3283f; }
+[data-theme="light"] .ad-form-panel .input-validation-error:focus { box-shadow: 0 0 0 3px rgba(195, 40, 63, .15); }
+[data-theme="light"] .ad-validation,
+[data-theme="light"] .ad-legacy .text-danger { color: #b3261e !important; }
+[data-theme="light"] .ad-submit-status { color: #066b8a; }
+
+/* ---------- Resultado: gravidade, oficinas, avisos ---------- */
+[data-theme="light"] .ad-severity { --ad-severity: #56667c; }
+[data-theme="light"] .ad-severity-high { --ad-severity: #c0283f; }
+[data-theme="light"] .ad-severity-medium { --ad-severity: #9a6200; }
+[data-theme="light"] .ad-severity-low { --ad-severity: #0f8257; }
+[data-theme="light"] .ad-severity-track i { background: #d6dee8; }
+[data-theme="light"] .ad-severity-high .ad-severity-track i,
+[data-theme="light"] .ad-severity-medium .ad-severity-track i:nth-child(-n+2),
+[data-theme="light"] .ad-severity-low .ad-severity-track i:first-child { background: var(--ad-severity); }
+[data-theme="light"] .ad-workshop-icon { border-color: rgba(8, 120, 154, .25); background: rgba(8, 120, 154, .06); }
+[data-theme="light"] .ad-match { color: #066b8a; background: rgba(8, 120, 154, .08); }
+[data-theme="light"] .ad-notice { border-color: rgba(154, 98, 0, .28); border-left-color: #b57600; background: #fff7e8; color: #6a4300; }
+[data-theme="light"] .ad-notice-success { border-color: rgba(15, 130, 87, .28); border-left-color: #0f8257; background: #eaf8f1; color: #0b5c3e; }
+[data-theme="light"] .ad-map-modal .btn-close-white { filter: none; }
+
+/* ---------- Telas antigas (login, cadastro, histórico) ---------- */
+[data-theme="light"] .ad-legacy .card { box-shadow: 0 10px 30px rgba(16, 42, 82, .06); }
+[data-theme="light"] .ad-legacy .table {
+    --bs-table-bg: #ffffff; --bs-table-color: var(--ad-ink);
+    --bs-table-striped-bg: #f1f5f9; --bs-table-striped-color: var(--ad-ink);
+    --bs-table-hover-color: var(--ad-ink);
+    color: var(--ad-ink); border-color: #d6dee8;
+}
+[data-theme="light"] .ad-legacy .table > :not(:last-child) > :last-child > * { border-bottom-color: #b4c2d3; }
