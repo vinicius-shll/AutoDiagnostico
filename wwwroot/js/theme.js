@@ -1,6 +1,3 @@
-/* Alternância entre modo claro e escuro.
-   O tema inicial já é aplicado por um script curto no <head> do _Layout (evita "piscar" escuro→claro).
-   Ordem de decisão: escolha salva pelo usuário > preferência do sistema operacional > escuro. */
 (() => {
     'use strict';
     const KEY = 'ad-theme';
@@ -30,11 +27,10 @@
         button.addEventListener('click', () => {
             const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
             apply(next);
-            try { localStorage.setItem(KEY, next); } catch { /* navegação privada: vale só nesta página */ }
+            try { localStorage.setItem(KEY, next); } catch { }
         });
     }
 
-    // Se o usuário nunca escolheu, acompanha a mudança do sistema em tempo real.
     systemLight?.addEventListener?.('change', event => {
         const choice = saved();
         if (choice !== 'light' && choice !== 'dark') apply(event.matches ? 'light' : 'dark');

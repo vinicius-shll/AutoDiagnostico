@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoDiagnostico.Controllers;
 
-// Página de TESTE da Milena: chama o diagnóstico sem precisar das telas.
-// Abra no navegador: http://localhost:5034/TesteIa?sintoma=barulho ao frear
-// [Authorize]: com o site na internet, só quem está logado gasta a cota do Gemini por aqui.
 [Authorize]
 public class TesteIaController : Controller
 {

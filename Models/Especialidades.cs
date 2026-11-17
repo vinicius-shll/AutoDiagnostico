@@ -1,11 +1,5 @@
 namespace AutoDiagnostico.Models;
 
-/// <summary>
-/// Lista FIXA de especialidades que a IA pode indicar.
-/// A Milena usa no prompt (a IA só pode responder um destes valores)
-/// e o Kauan usa para destacar as oficinas certas.
-/// Se mudar algum nome aqui, avise os dois.
-/// </summary>
 public static class Especialidades
 {
     public const string Outros = "Outros";

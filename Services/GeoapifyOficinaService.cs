@@ -5,7 +5,6 @@ using AutoDiagnostico.Models;
 
 namespace AutoDiagnostico.Services;
 
-// Service REAL da busca de oficinas, usando a Geoapify. Dono: Kauan.
 public class GeoapifyOficinaService : IOficinaService
 {
     private readonly HttpClient _http;
@@ -34,15 +33,12 @@ public class GeoapifyOficinaService : IOficinaService
 
         try
         {
-            // 1. Descobre o ponto no mapa (latitude e longitude) do endereço
             var (lat, lon) = await ObterCoordenadasAsync(endereco);
             _logger.LogInformation("O endereço '{Endereco}' fica em lat {Lat}, lon {Lon}", endereco, lat, lon);
 
-            // 2. Escreve os números com PONTO decimal (o C# em português usaria vírgula e quebraria a URL)
             var latTexto = lat.ToString(CultureInfo.InvariantCulture);
             var lonTexto = lon.ToString(CultureInfo.InvariantCulture);
 
-            // 3. Monta a busca: oficinas mecânicas num círculo ao redor do ponto (atenção: LON vem antes de LAT)
             var url = "https://api.geoapify.com/v2/places"
                     + "?categories=service.vehicle.repair.car"
                     + "&filter=circle:" + lonTexto + "," + latTexto + "," + _raioMetros
@@ -50,11 +46,9 @@ public class GeoapifyOficinaService : IOficinaService
                     + "&limit=10"
                     + "&apiKey=" + _apiKey;
 
-            // 4. Faz a busca
             var json = await _http.GetStringAsync(url);
             using var documento = JsonDocument.Parse(json);
 
-            // 5. Cada item da lista "features" é uma oficina
             var oficinas = new List<Oficina>();
             foreach (var item in documento.RootElement.GetProperty("features").EnumerateArray())
             {
@@ -70,12 +64,10 @@ public class GeoapifyOficinaService : IOficinaService
                 });
             }
 
-            // 6. Devolve da mais perto para a mais longe
             return oficinas.OrderBy(o => o.DistanciaMetros).ToList();
         }
         catch (ServicoExternoException)
         {
-            // Já é o nosso erro "combinado", com mensagem amigável: só repassa
             throw;
         }
         catch (TaskCanceledException ex)
@@ -97,14 +89,10 @@ public class GeoapifyOficinaService : IOficinaService
         }
     }
 
-    // Transforma um endereço (ou CEP) em latitude e longitude
     private async Task<(double Lat, double Lon)> ObterCoordenadasAsync(string endereco)
     {
-        // 1. Tenta direto na Geoapify
         var coordenadas = await GeocodificarAsync(endereco);
 
-        // 2. A Geoapify não conhece muitos CEPs do Brasil. Se for um CEP, o ViaCEP (Correios)
-        //    diz a rua e a cidade, e tentamos de novo com esse endereço
         if (coordenadas == null)
         {
             var cep = Regex.Match(endereco, @"\b(\d{5})-?(\d{3})\b");
@@ -127,19 +115,15 @@ public class GeoapifyOficinaService : IOficinaService
         return coordenadas.Value;
     }
 
-    // Pergunta à Geoapify onde fica o texto; devolve null se ela não achar nada
     private async Task<(double Lat, double Lon)?> GeocodificarAsync(string texto)
     {
-        // 1. Monta o endereço da API de Geocoding, só com resultados do Brasil
         var url = "https://api.geoapify.com/v1/geocode/search"
                 + "?text=" + Uri.EscapeDataString(texto)
                 + "&filter=countrycode:br&lang=pt&format=json&limit=1"
                 + "&apiKey=" + _apiKey;
 
-        // 2. Faz a chamada e recebe o JSON
         var json = await _http.GetStringAsync(url);
 
-        // 3. A resposta tem uma lista "results"; pegamos o primeiro item
         using var documento = JsonDocument.Parse(json);
         var resultados = documento.RootElement.GetProperty("results");
 
@@ -152,8 +136,6 @@ public class GeoapifyOficinaService : IOficinaService
         return (primeiro.GetProperty("lat").GetDouble(), primeiro.GetProperty("lon").GetDouble());
     }
 
-    // Consulta o ViaCEP e monta "Rua, Bairro, Cidade - UF, Brasil". Devolve null se não achar.
-    // Se o ViaCEP falhar, também devolve null: aí o usuário vê "Não encontramos esse endereço".
     private async Task<string?> BuscarEnderecoDoCepAsync(string cep)
     {
         try
@@ -162,7 +144,6 @@ public class GeoapifyOficinaService : IOficinaService
             using var documento = JsonDocument.Parse(json);
             var raiz = documento.RootElement;
 
-            // CEP inexistente: o ViaCEP responde { "erro": "true" }
             if (raiz.TryGetProperty("erro", out _))
             {
                 return null;
@@ -185,7 +166,6 @@ public class GeoapifyOficinaService : IOficinaService
         }
     }
 
-    // Lê um campo de texto do JSON; se ele não existir, devolve null
     private static string? LerTexto(JsonElement objeto, string campo)
     {
         if (objeto.TryGetProperty(campo, out var valor) && valor.ValueKind == JsonValueKind.String)

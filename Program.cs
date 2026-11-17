@@ -4,18 +4,10 @@ using Microsoft.Data.SqlClient;
 using AutoDiagnostico.Data;
 using AutoDiagnostico.Services;
 
-// ATENÇÃO: este arquivo é só do Vinicius. Precisa mudar algo aqui? Peça a ele.
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-// Banco de dados (SQL Server via Entity Framework Core).
-// Na máquina de cada um (Development): o site escolhe sozinho o SQL Server que existir
-// (LocalDB ou SQLEXPRESS). Veja EscolherConnectionString no fim deste arquivo.
-// Na hospedagem (Production): usa direto a connection string da variável de ambiente
-// ConnectionStrings__AutoDiagnosticoContext, configurada no painel da hospedagem, sem testar nada local.
-// (Sem essa variável, como no "dotnet ef migrations add", continua a escolha automática.)
 var connectionStringConfigurada = builder.Configuration.GetConnectionString("AutoDiagnosticoContext");
 var hospedado = !builder.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(connectionStringConfigurada);
 var connectionString = hospedado
@@ -24,15 +16,12 @@ var connectionString = hospedado
 builder.Services.AddDbContext<AutoDiagnosticoContext>(options =>
     options.UseSqlServer(connectionString, sql =>
     {
-        // Banco em outro servidor: uma queda rápida de conexão é tentada de novo antes de virar erro
         if (hospedado)
         {
             sql.EnableRetryOnFailure();
         }
     }));
 
-// Login por cookie (cards do Luan). Quem não está logado e tenta abrir
-// uma página com [Authorize] é mandado para /Conta/Login.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -43,9 +32,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
-// Services reais. As chaves ficam nos user-secrets de cada máquina:
-// dotnet user-secrets set "Gemini:ApiKey" "SUA_CHAVE"
-// dotnet user-secrets set "Geoapify:ApiKey" "SUA_CHAVE"
 var tempoMaximoChamada = TimeSpan.FromSeconds(30);
 
 builder.Services.AddHttpClient<IDiagnosticoService, GeminiDiagnosticoService>(
@@ -56,9 +42,6 @@ builder.Services.AddHttpClient<IOficinaService, GeoapifyOficinaService>(
 
 var app = builder.Build();
 
-// Cria o banco e aplica as migrations sozinho ao iniciar o site.
-// Ninguém da equipe precisa rodar "dotnet ef database update".
-// (Os comandos "dotnet ef" param no builder.Build() acima, então esta parte não roda durante eles.)
 using (var escopo = app.Services.CreateScope())
 {
     escopo.ServiceProvider.GetRequiredService<AutoDiagnosticoContext>().Database.Migrate();
@@ -75,7 +58,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // precisa vir ANTES do UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -85,12 +68,6 @@ app.MapControllerRoute(
 app.Run();
 
 
-// Testa, em ordem, os jeitos mais comuns de ter SQL Server no Windows e devolve o primeiro que responder:
-//   1. A connection string configurada (appsettings.json ou user-secrets — quem tem instância com outro nome usa user-secrets)
-//   2. LocalDB              — vem com o Visual Studio ou com a opção "LocalDB" do instalador do SQL Server Express
-//   3. localhost\SQLEXPRESS — o que o instalador do SQL Server Express cria na instalação "Básica"
-//   4. localhost            — SQL Server instalado como instância padrão
-// O teste conecta no banco "master", que sempre existe; o banco AutoDiagnostico é criado pelo Database.Migrate() ao iniciar.
 static string EscolherConnectionString(IConfiguration config)
 {
     const string resto = "Database=AutoDiagnostico;Trusted_Connection=True;TrustServerCertificate=True;";
@@ -110,7 +87,6 @@ static string EscolherConnectionString(IConfiguration config)
         var teste = new SqlConnectionStringBuilder(candidata)
         {
             InitialCatalog = "master",
-            // O LocalDB pode demorar alguns segundos para "acordar" na primeira vez
             ConnectTimeout = candidata.Contains("(localdb)", StringComparison.OrdinalIgnoreCase) ? 15 : 5
         };
 
@@ -123,7 +99,6 @@ static string EscolherConnectionString(IConfiguration config)
         }
         catch (Exception)
         {
-            // Este não existe nesta máquina: tenta o próximo
         }
     }
 

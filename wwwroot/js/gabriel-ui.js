@@ -1,4 +1,3 @@
-/* NEO DRIVE: progressive enhancement only; never replaces MVC navigation or POST. */
 (() => {
     'use strict';
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -70,7 +69,6 @@
     };
     symptom.addEventListener('input', updateCount);
     form.addEventListener('reset', () => requestAnimationFrame(resetForm));
-    // Restores the button when Back returns this document from the browser's cache.
     window.addEventListener('pageshow', resetForm);
     updateCount();
     form.addEventListener('submit', event => {
@@ -86,7 +84,6 @@
             form.reportValidity();
             return;
         }
-        // No fake progress, stages, fetch, timers or changes to the submitted fields.
         submitting = true;
         button.disabled = true;
         label.textContent = 'Aguardando resultado…';

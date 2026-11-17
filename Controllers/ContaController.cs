@@ -84,7 +84,6 @@ public class ContaController: Controller
             return View(vm);
         }
 
-        // cra chá
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
@@ -93,7 +92,6 @@ public class ContaController: Controller
         };
         var identidade = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-        // IsPersistent: o login continua mesmo se o navegador for fechado (até o ExpireTimeSpan do Program.cs)
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identidade),
             new AuthenticationProperties { IsPersistent = true });
 

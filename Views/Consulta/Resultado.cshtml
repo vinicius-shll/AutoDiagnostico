@@ -81,7 +81,6 @@
             }
         </div>
 
-        @* Janela do mapa: abre por cima do resultado. O botão "Ver no mapa" preenche o título e o endereço do mapa. *@
         <div class="modal fade ad-map-modal" id="mapaModal" tabindex="-1" aria-labelledby="mapaModalTitulo" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
@@ -104,7 +103,6 @@
 
 @section Scripts {
     <script>
-        // Quando a janela do mapa abre, pega os dados do botão clicado e carrega o mapa daquela oficina.
         (function () {
             var modal = document.getElementById("mapaModal");
             if (!modal) return;
@@ -117,7 +115,6 @@
                 frame.src = botao.getAttribute("data-mapa-embutido");
             });
 
-            // Ao fechar, limpa o mapa para não ficar carregando por trás.
             modal.addEventListener("hidden.bs.modal", function () {
                 frame.src = "about:blank";
             });

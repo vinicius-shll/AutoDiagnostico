@@ -1,4 +1,3 @@
-/* AutoDiagnóstico — NEO DRIVE. Gabriel's isolated visual layer. No remote dependencies. */
 .ad-app {
     --ad-bg: #070b14; --ad-surface: #101827; --ad-panel: #101a29;
     --ad-ink: #f3f7ff; --ad-muted: #a3b2c8; --ad-cyan: #37d8f6; --ad-blue: #557cff;
@@ -108,7 +107,6 @@
 .ad-form-panel .input-validation-error { border-color: #ff99aa; }.ad-form-panel .input-validation-error:focus { box-shadow: 0 0 0 3px #ff99aa22; }
 .ad-field-meta { display: flex; justify-content: space-between; gap: 12px; color: #9eafc5; font-size: 11px; margin: 8px 0 0; }.ad-field-meta span:last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .ad-validation { color: #ffabb8; font-size: 12px; display: block; margin-top: 8px; }.ad-validation.validation-summary-valid { display: none; }.ad-validation ul { padding-left: 20px; }
-/* Espaço da mensagem já reservado: quando o erro aparece, o botão não se mexe no meio do clique */
 .ad-field .ad-validation { min-height: 18px; line-height: 18px; }
 .ad-submit { width: 100%; }.ad-submit:disabled { cursor: wait; opacity: .8; transform: none; }.ad-submit-status { min-height: 1.6em; margin: 10px 0 0; font-size: 12px; text-align: center; color: #b7eaf3; }
 .ad-form-footnote { color: var(--ad-muted); font-size: 11px; text-align: center; margin: 8px 0 0; }
@@ -132,10 +130,8 @@
 .ad-notice { padding: 22px 26px; border: 1px solid #ffd07e40; border-left: 3px solid #ffd07e; border-radius: 10px; background: #ffd07e09; color: #f0d9b0; font-size: 14px; margin: 20px 0; }.ad-notice p { margin: 8px 0 0; }.ad-notice-success { border-color: #78e8be55; border-left-color: #78e8be; color: #a5f0cf; background: #78e8be09; }
 .ad-empty { padding: 36px; text-align: center; }.ad-empty-symbol { color: var(--ad-cyan); display: block; font-size: 40px; margin-bottom: 20px; }.ad-empty p { color: var(--ad-muted); font-size: 14px; }.ad-result-actions { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; margin-top: 40px; }
 .ad-error { max-width: 680px; margin: 20px auto 35px; text-align: center; }.ad-error .ad-eyebrow { justify-content: center; }.ad-error h1 { font-size: clamp(43px,5vw,64px); }.ad-error .ad-lead { margin: 22px auto 28px; }.ad-error-art img { display: block; width: min(100%,380px); height: auto; margin: 0 auto 18px; }.ad-request-id { font-size: 11px; color: var(--ad-muted); margin-top: 30px; }.ad-request-id code { color: #b3d6e8; overflow-wrap: anywhere; }
-/* Compatibility boundary: unchanged colleague Views receive only a legible theme. */
 .ad-legacy { padding-top: 55px; padding-bottom: 65px; }
 .ad-legacy .card { background: var(--ad-surface); color: var(--ad-ink); border-color: var(--ad-line); border-radius: 16px; }.ad-legacy .card-body { padding: 24px; }.ad-legacy .form-control { color: var(--ad-ink); background: #09121f; border-color: #465770; }.ad-legacy .form-control:focus { border-color: var(--ad-cyan); }.ad-legacy .text-danger { color: #ffabb8 !important; }.ad-legacy .text-muted { color: var(--ad-muted) !important; }.ad-legacy .btn-primary { background: #37d8f6; color: #061019; border-color: #37d8f6; }.ad-legacy .table { --bs-table-bg: #101827; --bs-table-color: #f3f7ff; --bs-table-striped-bg: #172334; --bs-table-striped-color: #f3f7ff; --bs-table-hover-color: #fff; color: #f3f7ff; border-color: #314156; font-size: 13px; table-layout: fixed; width: 100%; }.ad-legacy .table > :not(caption) > * > * { padding: 13px 10px; overflow-wrap: anywhere; }.ad-legacy .table .badge { white-space: normal; }.ad-legacy .table > :not(:last-child) > :last-child > * { border-bottom-color: #455976; }
-/* Content remains visible without JS or IntersectionObserver. Animations are finite. */
 .ad-reveal-visible { animation: ad-enter .7s var(--ad-ease) both; animation-delay: var(--ad-delay,0ms); }
 @keyframes ad-enter { from { opacity: .25; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 @media (min-width: 768px) { .ad-step-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }.ad-workshop-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }.ad-diagnosis-grid { grid-template-columns: minmax(0,1.7fr) minmax(0,1fr); }.ad-form-panel { padding: 35px; } }

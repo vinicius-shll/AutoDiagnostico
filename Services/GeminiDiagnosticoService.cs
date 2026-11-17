@@ -5,31 +5,18 @@ using AutoDiagnostico.Models;
 
 namespace AutoDiagnostico.Services;
 
-// Service REAL do diagnóstico, usando a IA do Google (Gemini). Dona: Milena.
-// Resiliência (Vinicius, 15/10): quando o Gemini está sobrecarregado (erro 503 "high demand")
-// ou limita as chamadas (429), tenta de novo e, se continuar falhando, usa o modelo de reserva.
-// Resiliência 2 (03/11): 503 passa direto para o modelo de reserva, e o modelo principal fica
-// "de castigo" por alguns minutos depois de falhar, para as próximas consultas não perderem tempo com ele.
 public class GeminiDiagnosticoService : IDiagnosticoService
 {
-    // Quantas vezes tentar cada modelo antes de passar para o próximo
     private const int TentativasPorModelo = 2;
 
-    // Tempo máximo somando TODAS as tentativas. Depois disso, desiste e mostra o aviso na tela.
     private static readonly TimeSpan TempoTotalMaximo = TimeSpan.FromSeconds(25);
 
-    // Tempo máximo de UMA tentativa no modelo principal. Sobrecarregado, o Gemini às vezes "trava"
-    // em vez de responder 503; este limite garante que sempre sobra tempo para o modelo de reserva.
-    // (Uma resposta normal leva 1 a 3 s; medido em 15/10.)
     private static readonly TimeSpan TempoMaximoPorTentativa = TimeSpan.FromSeconds(8);
 
-    // Erros do Gemini que costumam passar sozinhos: vale tentar de novo
     private static readonly int[] ErrosPassageiros = { 429, 500, 502, 503, 504 };
 
-    // Depois que o modelo principal falha, as consultas seguintes vão direto ao de reserva por este tempo
     private static readonly TimeSpan PausaDoModeloPrincipal = TimeSpan.FromMinutes(5);
 
-    // Até quando o modelo principal está "de castigo" (em ticks; static porque o service é criado a cada consulta)
     private static long _principalPausadoAte;
 
     private readonly HttpClient _http;
@@ -47,7 +34,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
         _logger = logger;
         _apiKey = config["Gemini:ApiKey"] ?? string.Empty;
 
-        // Primeiro o modelo principal; se ele falhar, o de reserva (os dois vêm do appsettings.json)
         _modelos = new[]
             {
                 config["Gemini:Modelo"] ?? "gemini-3.5-flash",
@@ -57,8 +43,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
             .Distinct()
             .ToList();
 
-        // Quanto o modelo "pensa" antes de responder (low, medium, high). Vazio = padrão do modelo.
-        // Para um JSON curto, "low" responde bem e bem mais rápido.
         _nivelRaciocinio = config["Gemini:NivelRaciocinio"] ?? string.Empty;
     }
 
@@ -79,7 +63,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
             var ehUltimoModelo = modelo == _modelos[^1];
             var ehPrincipalComReserva = modelo == _modelos[0] && !ehUltimoModelo;
 
-            // O principal falhou há pouco? Vai direto ao de reserva
             if (ehPrincipalComReserva && DateTime.UtcNow.Ticks < Interlocked.Read(ref _principalPausadoAte))
             {
                 _logger.LogInformation("Gemini: modelo {Modelo} pausado após falha recente; usando o de reserva.", modelo);
@@ -95,7 +78,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
                     throw new ServicoExternoException(mensagemParaUsuario);
                 }
 
-                // O último modelo pode usar todo o tempo que sobrou; os outros têm teto por tentativa
                 var tempoDestaTentativa = ehUltimoModelo || tempoRestante < TempoMaximoPorTentativa
                     ? tempoRestante
                     : TempoMaximoPorTentativa;
@@ -117,22 +99,21 @@ public class GeminiDiagnosticoService : IDiagnosticoService
 
                     if (!falha.ValeRepetir)
                     {
-                        break; // este modelo não vai funcionar: passa para o próximo
+                        break;
                     }
 
                     if (falha.MelhorTrocarDeModelo && !ehUltimoModelo)
                     {
-                        break; // sobrecarregado: o próximo modelo tem mais chance que uma nova tentativa neste
+                        break;
                     }
 
                     if (tentativa < TentativasPorModelo)
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(tentativa)); // espera 1 s antes de tentar de novo
+                        await Task.Delay(TimeSpan.FromSeconds(tentativa));
                     }
                 }
             }
 
-            // Chegou aqui = o principal não respondeu: pausa ele para as próximas consultas
             if (ehPrincipalComReserva)
             {
                 Interlocked.Exchange(ref _principalPausadoAte, DateTime.UtcNow.Add(PausaDoModeloPrincipal).Ticks);
@@ -143,7 +124,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
         throw new ServicoExternoException(mensagemParaUsuario);
     }
 
-    // Monta o "pacote" que o Gemini espera receber, pedindo a resposta em JSON com 4 campos fixos
     private object MontarCorpo(string sintoma)
     {
         var prompt = string.Join("\n",
@@ -156,7 +136,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
             "- especialidade: exatamente um destes valores: " + string.Join(", ", Especialidades.Todas) + ".",
             "Se o texto não for sobre um problema de carro, use gravidade Baixa, especialidade Outros e peça mais detalhes no resumo.");
 
-        // O schema obriga o formato (campos, valores permitidos e 2 a 4 causas): menos respostas fora do formato
         var configuracao = new Dictionary<string, object>
         {
             ["responseMimeType"] = "application/json",
@@ -188,7 +167,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
         };
     }
 
-    // Uma chamada a um modelo. Devolve o diagnóstico ou lança TentativaFalhou dizendo se vale repetir.
     private async Task<DiagnosticoResultado> ChamarModeloAsync(string modelo, object corpo, TimeSpan tempoMaximo)
     {
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelo}:generateContent";
@@ -213,7 +191,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
         }
         catch (HttpRequestException ex)
         {
-            // Sem internet ou endereço inacessível: repetir não adianta
             _logger.LogError(ex, "Falha de conexão com o Gemini.");
             throw new ServicoExternoException(
                 "Não conseguimos falar com a IA agora. Verifique a internet e tente novamente.", ex);
@@ -225,8 +202,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
 
             if (ErrosPassageiros.Contains(status))
             {
-                // 503 = modelo sobrecarregado: repetir logo em seguida quase nunca adianta, passa para o próximo
-                // (no último modelo ainda vale uma nova tentativa, porque não há outro para tentar)
                 throw new TentativaFalhou($"erro {status}", valeRepetir: true,
                     status == 429
                         ? "Muitas consultas ao mesmo tempo. Espere um minuto e tente de novo."
@@ -236,18 +211,15 @@ public class GeminiDiagnosticoService : IDiagnosticoService
 
             if (status == 404)
             {
-                // Modelo com nome errado ou desativado: tenta o próximo modelo
                 throw new TentativaFalhou("modelo não encontrado", valeRepetir: false,
                     "Não conseguimos gerar o diagnóstico agora. Tente novamente.");
             }
 
-            // 400, 401, 403...: chave inválida ou pedido errado. Repetir não adianta.
             throw new ServicoExternoException("Não conseguimos gerar o diagnóstico agora. Tente novamente.");
         }
 
         try
         {
-            // Tira o texto de dentro da resposta: candidates[0].content.parts[0].text
             using var documento = JsonDocument.Parse(json);
             var texto = documento.RootElement
                 .GetProperty("candidates")[0]
@@ -258,7 +230,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
 
             _logger.LogInformation("Resposta do Gemini ({Modelo}): {Texto}", modelo, texto);
 
-            // O texto é um JSON: transforma em DiagnosticoResultado
             var opcoes = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             var resultado = JsonSerializer.Deserialize<DiagnosticoResultado>(texto, opcoes);
 
@@ -267,7 +238,6 @@ public class GeminiDiagnosticoService : IDiagnosticoService
                 throw new JsonException("resposta sem resumo");
             }
 
-            // Se a IA inventar uma especialidade fora da lista, usa "Outros"
             if (!Especialidades.Todas.Contains(resultado.Especialidade))
             {
                 resultado.Especialidade = Especialidades.Outros;
@@ -280,13 +250,11 @@ public class GeminiDiagnosticoService : IDiagnosticoService
                                    || ex is InvalidOperationException
                                    || ex is IndexOutOfRangeException)
         {
-            // A IA às vezes responde fora do formato; uma nova tentativa costuma resolver
             throw new TentativaFalhou("formato inesperado: " + ex.Message, valeRepetir: true,
                 "A IA respondeu num formato inesperado. Tente novamente.");
         }
     }
 
-    // Erro interno deste service: uma tentativa falhou. Nunca sai daqui; vira ServicoExternoException no fim.
     private sealed class TentativaFalhou : Exception
     {
         public bool ValeRepetir { get; }

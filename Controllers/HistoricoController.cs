@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoDiagnostico.Controllers;
 
-// Tela "Meu histórico": lista as consultas de quem está logado. Dona: Milena.
 [Authorize]
 public class HistoricoController : Controller
 {
@@ -17,14 +16,11 @@ public class HistoricoController : Controller
         _context = context;
     }
 
-    // Endereço: /Historico
     public async Task<IActionResult> Index()
     {
-        // Lê o Id do usuário que está no "crachá" (cookie) do login
         var idTexto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         int.TryParse(idTexto, out var usuarioId);
 
-        // Busca no banco só as consultas desse usuário, da mais nova para a mais antiga
         var consultas = await _context.Consultas
             .Where(c => c.UsuarioId == usuarioId)
             .OrderByDescending(c => c.DataHora)

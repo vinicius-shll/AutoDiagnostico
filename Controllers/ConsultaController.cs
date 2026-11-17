@@ -8,9 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AutoDiagnostico.Controllers;
 
-// O "maestro" da consulta: recebe o formulário, pede o diagnóstico e as oficinas,
-// salva no banco e mostra o resultado. Dono: Vinicius.
-// Telas (Gabriel): Views/Consulta/Criar.cshtml e Views/Consulta/Resultado.cshtml.
 [Authorize]
 public class ConsultaController : Controller
 {
@@ -28,19 +25,16 @@ public class ConsultaController : Controller
         _context = context;
     }
 
-    // GET /Consulta/Criar → mostra o formulário vazio
     [HttpGet]
     public IActionResult Criar()
     {
         return View(new ConsultaFormViewModel());
     }
 
-    // POST /Consulta/Criar → recebe o formulário preenchido
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Criar(ConsultaFormViewModel form)
     {
-        // 1. Formulário com erro? Volta para a mesma tela mostrando as mensagens
         if (!ModelState.IsValid)
         {
             return View(form);
@@ -52,7 +46,6 @@ public class ConsultaController : Controller
             Endereco = form.Endereco
         };
 
-        // 2. Pede o diagnóstico. Se a IA falhar, guarda a mensagem e continua
         try
         {
             resultado.Diagnostico = await _diagnostico.DiagnosticarAsync(form.Sintoma);
@@ -62,9 +55,6 @@ public class ConsultaController : Controller
             resultado.AvisoDiagnostico = ex.Message;
         }
 
-        // 3. Pede as oficinas e destaca as que combinam com a especialidade indicada pela IA.
-        //    Se a IA falhou, a especialidade vem vazia e a lista volta como veio.
-        //    Se a busca falhar, guarda a mensagem e continua
         try
         {
             var oficinas = await _oficinas.BuscarProximasAsync(PrepararEndereco(form.Endereco));
@@ -75,7 +65,6 @@ public class ConsultaController : Controller
             resultado.AvisoOficinas = ex.Message;
         }
 
-        // Descobre quem está logado (o Id foi guardado no crachá pelo login)
         var idTexto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         int? usuarioId = null;
         if (int.TryParse(idTexto, out var id))
@@ -83,7 +72,6 @@ public class ConsultaController : Controller
             usuarioId = id;
         }
 
-        // 4. Salva a consulta no banco
         var consulta = new Consulta
         {
             UsuarioId = usuarioId,
@@ -99,11 +87,9 @@ public class ConsultaController : Controller
         _context.Consultas.Add(consulta);
         await _context.SaveChangesAsync();
 
-        // 5. Mostra a tela de resultado (do Gabriel)
         return View("Resultado", resultado);
     }
 
-    // Se a pessoa digitou só um CEP (ex.: 80020-310), acrescenta ", Brasil" para a Geoapify entender melhor
     private static string PrepararEndereco(string endereco)
     {
         var texto = endereco.Trim();
